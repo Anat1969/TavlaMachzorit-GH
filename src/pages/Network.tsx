@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide, forceX, forceY, type SimulationNodeDatum } from 'd3-force'
 import { BY_SYM } from '../data/elements'
 import { colorOf, type ColorBy } from '../lib/colors'
@@ -9,6 +9,8 @@ import { Chips } from '../components/Chips'
 import { Legend } from '../components/Legend'
 import { ElementPanel } from '../components/ElementPanel'
 import { useTween } from '../lib/motion'
+
+const Network3D = lazy(() => import('../three/Network3D'))
 
 interface N extends SimulationNodeDatum { id: string; deg: number }
 
@@ -55,7 +57,7 @@ export function Network({ params }: { params: URLSearchParams }) {
   const lens = (params.get('lens') as Lens) || 'compounds'
   const colorBy = (params.get('color') as ColorBy) || (lens === 'geo' ? 'geo' : 'cat')
   const sel = params.get('el')
-  const view = params.get('view') === 'table' ? 'table' : 'net'
+  const view = (['table', '3d'].includes(params.get('view') ?? '') ? params.get('view') : 'net') as 'net' | 'table' | '3d'
   const narrow = useNarrow()
   const L0 = useMemo(() => layout(lens), [lens])
   // on a portrait phone screen, turn a landscape layout on its side so nodes stay readable
@@ -68,6 +70,7 @@ export function Network({ params }: { params: URLSearchParams }) {
   const netPos = useMemo(() => new Map(L.nodes.map((n) => [n.id, { x: n.x!, y: n.y! }])), [L])
   // first visit: elements leave their seats in the table and gather into the network
   const shown = useTween(view === 'table' ? tablePos : netPos, 1400, tablePos)
+  const ids = useMemo(() => L0.nodes.map((n) => n.id), [L0])
   const cellR = Math.min(L.box[2] / 18, L.box[3] / 10.6) * 0.42
 
   const surp = useMemo(() => surprises(lens, 8), [lens])
@@ -100,12 +103,28 @@ export function Network({ params }: { params: URLSearchParams }) {
       <div className="split fill">
         <div className="glass net-box">
           <div className="net-mode">
-            <button className="chip" aria-pressed={view === 'table'} onClick={() => setParam('view', view === 'table' ? null : 'table')}>
-              {view === 'table' ? 'פזר לרשת' : 'החזר לטבלה'}
-            </button>
-            <span className="small muted">{view === 'table' ? 'אותם קשרים, על הטבלה הרגילה: כל קו ארוך הוא דמיון שהטבלה מפרידה.' : 'המיקום נקבע רק לפי דמיון. יסודות דומים נמשכים זה לזה.'}</span>
+            <div className="row" role="group" aria-label="אופן תצוגה">
+              <button className="chip" aria-pressed={view === 'net'} onClick={() => setParam('view', null)}>רשת</button>
+              <button className="chip" aria-pressed={view === 'table'} onClick={() => setParam('view', 'table')}>על הטבלה</button>
+              <button className="chip" aria-pressed={view === '3d'} onClick={() => setParam('view', '3d')}>תלת־ממד</button>
+            </div>
+            <span className="small muted">{view === 'table' ? 'אותם קשרים, על הטבלה הרגילה: כל קו ארוך הוא דמיון שהטבלה מפרידה.' : view === '3d' ? 'כל כדור עשוי מהחומר האמיתי של היסוד: מתכת מלוטשת, זכוכית עם גז זוהר. גררו כדי לסובב.' : 'המיקום נקבע רק לפי דמיון. יסודות דומים נמשכים זה לזה.'}</span>
           </div>
-          <svg className={`net-svg${view === 'table' ? ' as-table' : ''}`} viewBox={L.box.join(' ')} role="img" aria-label={`רשת היסודות לפי ${info.label}: ${L.nodes.length} יסודות, ${L.edges.length} קשרים`}>
+          {view === '3d' && (
+            <Suspense fallback={<div className="net3d loading">טוען תלת־ממד</div>}>
+              <Network3D ids={ids} edges={L0.edges} sel={sel && L.pos.has(sel) ? sel : null} near={near} surprise={surpKeys} colorBy={colorBy} onPick={pick} />
+            </Suspense>
+          )}
+          <svg style={view === '3d' ? { display: 'none' } : undefined} className={`net-svg${view === 'table' ? ' as-table' : ''}`} viewBox={L.box.join(' ')} role="img" aria-label={`רשת היסודות לפי ${info.label}: ${L.nodes.length} יסודות, ${L.edges.length} קשרים`}>
+            <defs>
+              {/* a spherical highlight: light from the upper left, shade toward the lower right */}
+              <radialGradient id="gloss" cx="35%" cy="30%" r="75%">
+                <stop offset="0" stopColor="#fff" stopOpacity="0.75" />
+                <stop offset="0.35" stopColor="#fff" stopOpacity="0.12" />
+                <stop offset="0.8" stopColor="#000" stopOpacity="0.1" />
+                <stop offset="1" stopColor="#000" stopOpacity="0.35" />
+              </radialGradient>
+            </defs>
             {L.edges.map((e) => {
               const a = at(e.a), b = at(e.b)
               const key = e.a + '|' + e.b
@@ -133,6 +152,7 @@ export function Network({ params }: { params: URLSearchParams }) {
                   {sel === n.id && <><circle key={'r1' + sel} className="ripple" r={r} /><circle key={'r2' + sel} className="ripple late" r={r} /></>}
                   <g className={`pop${lit ? ' lit' : ''}`} style={{ animationDelay: lit ? `${250 + rank.get(n.id)! * 90}ms` : `${i * 6}ms` }} key={lit ? n.id + sel : n.id}>
                     <circle r={r} fill={colorOf(el, colorBy)} />
+                    <circle r={r} fill="url(#gloss)" className="gloss" />
                     <text style={{ fontSize: Math.max(7, Math.min(10, r * 0.9)) }}>{n.id}</text>
                   </g>
                 </g>

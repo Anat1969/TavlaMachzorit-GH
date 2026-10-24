@@ -5,6 +5,9 @@ import { candidates, W_HISTORY, W_PROPERTY } from '../lib/substitute'
 import { colorOf } from '../lib/colors'
 import { setParam, href } from '../lib/router'
 import { useHypotheses, toast } from '../lib/store'
+import { COMPOUND_LIFE } from '../data/everyday'
+import { RealWorld } from '../components/ElementPanel'
+import type { Candidate } from '../lib/substitute'
 
 const STARTERS = ['GaAs', 'MoS2', 'NaCl', 'TiO2', 'MgB2', 'CdTe', 'LaB6', 'SiC', 'Bi2Te3', 'Li3N']
 
@@ -19,6 +22,8 @@ export function Lab({ params }: { params: URLSearchParams }) {
   const cands = useMemo(() => (valid ? candidates(parts, index, 12) : []), [parts, index, valid])
   const [draft, setDraft] = useState(formula)
   const [preview, setPreview] = useState<string | null>(null) // candidate symbol shown in the formula
+  const [pinned, setPinned] = useState<string | null>(null)   // candidate whose invention path is shown
+  const path = cands.find((c) => c.sym === (pinned ?? cands.find((x) => !x.known)?.sym)) ?? cands[0]
   const hyp = useHypotheses()
   const containing = el ? COMPOUNDS.filter((c) => c.parts.some((p) => p[0] === el)).slice(0, 24) : []
 
@@ -83,12 +88,13 @@ export function Lab({ params }: { params: URLSearchParams }) {
                 רחפו על מועמד כדי לראות את ההחלפה בנוסחה. הפס העליון הוא ההיסטוריה והתחתון התכונות. הסימון "השערה" אומר רק שהנוסחה לא נמצאת במדגם: ייתכן שהחומר כבר ידוע בספרות, או שאינו יציב.
               </p>
             </div>
+            {path && <InventionPath key={formula + index + path.sym} template={formula} orig={parts[index][0]} cand={path} />}
             <div className="glass">
               {cands.length === 0 && <p className="panel muted">אין מספיק נתונים על היסוד הזה כדי להציע החלפות.</p>}
               {cands.map((c) => {
                 const e = BY_SYM.get(c.sym)!
                 return (
-                  <div key={c.sym} className="cand" onMouseEnter={() => setPreview(c.sym)} onMouseLeave={() => setPreview(null)} onFocus={() => setPreview(c.sym)} onBlur={() => setPreview(null)}>
+                  <div key={c.sym} className={`cand${path?.sym === c.sym ? ' pinned' : ''}`} onClick={(ev) => { if (!(ev.target as HTMLElement).closest('button,a')) setPinned(c.sym) }} onMouseEnter={() => setPreview(c.sym)} onMouseLeave={() => setPreview(null)} onFocus={() => setPreview(c.sym)} onBlur={() => setPreview(null)}>
                     <a className="chip sym-chip" href={href('matrix', { el: c.sym, lens: 'compounds' })} style={{ ['--cell' as string]: colorOf(e) }} title={`${e.he} במטריצה`}>{c.sym}</a>
                     <div style={{ minWidth: 0 }}>
                       <div className="row">
@@ -151,4 +157,44 @@ function DeleteButton({ onConfirm }: { onConfirm: () => void }) {
   return armed
     ? <button className="chip" style={{ borderColor: 'var(--c-alkali)' }} onClick={onConfirm} onBlur={() => setArmed(false)} autoFocus>לחצו שוב כדי למחוק</button>
     : <button className="chip" onClick={() => setArmed(true)}>מחק</button>
+}
+
+// The invention path: from a compound we use, through the shared patterns, to a new formula.
+function InventionPath({ template, orig, cand }: { template: string; orig: string; cand: Candidate }) {
+  const life = COMPOUND_LIFE[template]
+  return (
+    <div className="glass panel invention">
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <h2 style={{ margin: 0 }}>מסלול ההמצאה</h2>
+        <span className="small faint">לחצו על מועמד ברשימה כדי לראות את המסלול שלו</span>
+      </div>
+      <div className="stations">
+        <div className="station" style={{ animationDelay: '0ms' }}>
+          <span className="eyebrow">1 · מה שכבר קיים</span>
+          <b className="big" dir="ltr">{prettyFormula(template)}</b>
+          <p className="small muted">{life ? `בחיים: ${life}` : 'תרכובת מוכרת במאגר'}</p>
+          <RealWorld sym={orig} height={150} />
+        </div>
+        <div className="connector" style={{ animationDelay: '500ms' }} aria-hidden />
+        <div className="station bridge" style={{ animationDelay: '700ms' }}>
+          <span className="eyebrow">2 · מה {orig} ו-{cand.sym} חולקים</span>
+          <div className="evidence" dir="ltr">
+            {cand.evidence.length ? cand.evidence.map((t, i) => <span key={t} className="tpl" style={{ animationDelay: `${900 + i * 220}ms` }}>{prettyFormula(t)}</span>) : <span className="tpl">אין תבניות משותפות</span>}
+          </div>
+          <p className="small muted">{cand.evidence.length ? `בכל התבניות האלה ${cand.sym} כבר נכנס למקום של ${orig}. זה ההיגיון של ההחלפה.` : 'ההצעה נשענת רק על דמיון בתכונות.'}</p>
+          <div className="layers big-layers" aria-label={`היסטוריה ${cand.history.toFixed(2)}, תכונות ${cand.property.toFixed(2)}`}>
+            <i style={{ width: `${cand.history * 100}%` }} /><b style={{ width: `${cand.property * 100}%` }} />
+          </div>
+          <span className="mono small faint">היסטוריה {cand.history.toFixed(2)} · תכונות {cand.property.toFixed(2)}</span>
+        </div>
+        <div className="connector" style={{ animationDelay: '1500ms' }} aria-hidden />
+        <div className="station" style={{ animationDelay: '1700ms' }}>
+          <span className="eyebrow">3 · ההחלפה</span>
+          <b className="big" dir="ltr">{prettyFormula(cand.formula)}</b>
+          <p className="small">{cand.known ? <span className="tag known">כבר ידוע במאגר</span> : <span className="tag new">השערה לחומר חדש</span>}</p>
+          <RealWorld sym={cand.sym} height={150} />
+        </div>
+      </div>
+    </div>
+  )
 }

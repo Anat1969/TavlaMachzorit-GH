@@ -335,6 +335,58 @@ main > .fill { flex-shrink: 1; }
 .hn-far { stroke-dasharray: 0.06 0.04; animation: fadeIn 0.6s both, march 2.4s linear infinite; }
 .hn-node { animation: pop 0.6s ease-out both; }
 
+/* ---------- real matter: 3D samples, shelf, network ---------- */
+.sample-stage { position: relative; margin: 10px 0; overflow: hidden;
+  /* a photo-studio sweep: lit from above, falling into shade */
+  background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--glow) 18%, var(--deep)) 0%, var(--deep) 55%, color-mix(in srgb, var(--void) 70%, #000) 100%);
+  box-shadow: inset 0 -30px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08); }
+.sample3d, .shelf3d, .net3d { display: block; width: 100%; touch-action: none; cursor: grab; }
+.sample3d:active, .shelf3d:active, .net3d:active { cursor: grabbing; }
+.net3d { position: absolute; inset: 0; height: 100%; }
+.shelf3d { margin-top: 8px; background: radial-gradient(90% 120% at 50% 0%, color-mix(in srgb, var(--glow) 16%, var(--deep)), var(--deep) 60%, color-mix(in srgb, var(--void) 60%, #000)); box-shadow: inset 0 -40px 50px rgba(0,0,0,0.35); }
+.loading { display: grid; place-items: center; min-height: 150px; font-family: var(--mono); font-size: 12px; color: var(--ink-faint); letter-spacing: 0.08em; }
+.sample-tag { position: absolute; bottom: 6px; inset-inline-start: 8px; font-size: 11px; color: var(--ink-soft); background: var(--glass-strong); padding: 2px 6px; }
+.realworld h3 { margin: 4px 0; }
+.uses { margin: 0 0 8px; padding-inline-start: 18px; font-size: 13px; color: var(--ink-soft); display: grid; gap: 2px; }
+
+.things { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.thing { font: inherit; color: var(--ink); text-align: start; cursor: pointer; padding: 10px 12px; display: grid; gap: 2px; border-radius: 0;
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s; }
+.thing b { font-weight: 400; font-size: 16px; }
+.thing:hover { transform: translateY(-3px); border-color: var(--glow); box-shadow: 0 16px 30px rgba(0,0,0,0.4); }
+.thing:active { transform: translateY(0); box-shadow: var(--press); }
+.thing.is-a { border-color: var(--glow); box-shadow: inset 0 -3px 0 var(--glow), var(--shadow); }
+.thing.is-b { border-color: var(--warn); box-shadow: inset 0 -3px 0 var(--warn), var(--shadow); }
+.life-rings rect { fill: none; stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: ringIn 0.45s ease-out both; }
+.life-rings .side-a { stroke: var(--glow); }
+.life-rings .side-b { stroke: var(--warn); }
+.life-rings .both { stroke: var(--accent); stroke-width: 3.5; filter: drop-shadow(0 0 6px var(--accent)); }
+.legend .lg-a { background: transparent; box-shadow: inset 0 0 0 2px var(--glow); }
+.legend .lg-b { background: transparent; box-shadow: inset 0 0 0 2px var(--warn); }
+.legend .lg-both { background: transparent; box-shadow: inset 0 0 0 3px var(--accent); }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; color: inherit; text-decoration: none; padding: 6px 4px; border-bottom: 1px solid var(--rim); font-size: 14px; transition: background 0.15s; }
+.pair:hover { background: rgba(124,196,255,0.07); }
+.pair .bar { grid-column: 1 / -1; height: 4px; background: var(--deep); position: relative; }
+.pair .bar b { position: absolute; inset-block: 0; inset-inline-start: 0; background: var(--accent); animation: grow 0.7s ease-out both; }
+
+.invention .stations { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr); gap: 8px; align-items: stretch; margin-top: 10px; }
+.station { display: flex; flex-direction: column; gap: 4px; padding: 10px; background: color-mix(in srgb, var(--deep) 70%, transparent); border: 1px solid var(--rim); min-width: 0; animation: rise 0.6s ease-out both; }
+.station .big { font-size: 28px; font-weight: 300; text-align: right; }
+.station p { margin: 0; }
+.station .realworld .uses, .station .realworld .row { display: none; }
+.station .realworld h3 { display: none; }
+.connector { align-self: center; height: 3px; background: linear-gradient(90deg, var(--accent), var(--glow)); transform-origin: right; animation: stretch 0.5s ease-out both; position: relative; }
+.connector::after { content: ''; position: absolute; left: -2px; top: -5px; border: 6px solid transparent; border-right-color: var(--accent); }
+.evidence { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.tpl { font-family: var(--mono); font-size: 15px; padding: 4px 8px; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); animation: pop 0.4s ease-out both; }
+.big-layers { max-width: none; }
+.big-layers i, .big-layers b { height: 7px; }
+.cand.pinned { background: rgba(139,227,201,0.09); box-shadow: inset -3px 0 0 var(--accent); }
+.cand { cursor: pointer; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes stretch { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.net-svg .gloss { pointer-events: none; }
+
 /* toast */
 .toast { position: fixed; bottom: 20px; left: 20px; z-index: 50; padding: 10px 16px; font-size: 14px; border-inline-start: 3px solid var(--accent); }
 .toast.err { border-color: var(--c-alkali); }
@@ -355,8 +407,15 @@ main > .fill { flex-shrink: 1; }
 @media (max-width: 1024px) {
   .split { grid-template-columns: minmax(0, 1fr); }
   .net-box { min-height: 0; }
+  .net3d { position: relative; height: 70vh; margin-top: 56px; }
   .net-svg { height: auto; }
 }
+@media (max-width: 900px) {
+  .invention .stations { grid-template-columns: minmax(0, 1fr); }
+  .connector { width: 3px; height: 24px; justify-self: center; transform-origin: top; animation-name: stretchY; }
+  .connector::after { display: none; }
+}
+@keyframes stretchY { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @media (max-width: 768px) {
   .hero { grid-template-columns: minmax(0, 1fr); }
   .hero-art { max-width: 380px; margin: 0 auto; width: 100%; }

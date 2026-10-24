@@ -8,6 +8,7 @@ import { Secondary } from './pages/Secondary'
 import { Spiral } from './pages/Spiral'
 import { Lab } from './pages/Lab'
 import { TablePage } from './pages/TablePage'
+import { Life } from './pages/Life'
 
 declare module 'react' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -19,6 +20,7 @@ export const PAGES = [
   { id: 'network', label: 'רשת' },
   { id: 'secondary', label: 'מחזוריות משנית' },
   { id: 'spiral', label: 'ספירלה' },
+  { id: 'life', label: 'בחיים' },
   { id: 'lab', label: 'מעבדת חומרים' },
   { id: 'table', label: 'טבלת נתונים' },
 ]
@@ -45,13 +47,14 @@ export function App() {
       case 'network': return <Network params={p} />
       case 'secondary': return <Secondary params={p} />
       case 'spiral': return <Spiral params={p} />
+      case 'life': return <Life params={p} />
       case 'lab': return <Lab params={p} />
       case 'table': return <TablePage />
       default: return <Home />
     }
   })()
   return (
-    <div className={`shell${route.page === 'home' || route.page === 'lab' || route.page === 'table' ? '' : ' fit'}`}>
+    <div className={`shell${route.page === 'home' || route.page === 'lab' || route.page === 'table' || route.page === 'life' ? '' : ' fit'}`}>
       <div className="orbs" aria-hidden><span /><span /><span /></div>
       <header className="topbar">
         <a className="brand" href={href('home')} aria-label="טבלה מחזורית כרשת, דף הבית">

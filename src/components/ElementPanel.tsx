@@ -3,6 +3,10 @@ import { colorOf, type ColorBy } from '../lib/colors'
 import { LENSES, neighbours, sharedTemplates, type Lens } from '../lib/similarity'
 import { href } from '../lib/router'
 import { prettyFormula } from '../data/compounds'
+import { lazy, Suspense } from 'react'
+import { EVERYDAY, KIND_LABEL, STATE_LABEL, THINGS } from '../data/everyday'
+
+const Sample3D = lazy(() => import('../three/Sample3D'))
 
 interface Props { sym: string | null; lens?: Lens; colorBy?: ColorBy; onPick: (s: string) => void }
 
@@ -28,6 +32,7 @@ export function ElementPanel({ sym, lens = 'compounds', colorBy = 'cat', onPick 
           <div className="small muted">{CAT_LABEL[e.cat]}</div>
         </div>
       </div>
+      <RealWorld sym={sym} />
       <dl className="facts">
         <dt>אלקטרושליליות</dt><dd>{e.en ?? 'אין נתון'}</dd>
         <dt>רדיוס קוולנטי</dt><dd>{e.radius ? `${e.radius} pm` : 'אין נתון'}</dd>
@@ -56,5 +61,30 @@ export function ElementPanel({ sym, lens = 'compounds', colorBy = 'cat', onPick 
         <a className="btn" href={href('network', { lens, el: sym })}>הצג ברשת</a>
       </div>
     </div>
+  )
+}
+
+// How the element meets us: a studio shot of a real sample, and where we use it.
+export function RealWorld({ sym, height = 200 }: { sym: string; height?: number }) {
+  const d = EVERYDAY.get(sym)
+  if (!d) return null
+  const things = THINGS.filter((t) => t.els.includes(sym))
+  return (
+    <section className="realworld" aria-label="בעולם האמיתי">
+      <div className="sample-stage">
+        <Suspense fallback={<div className="sample3d loading" style={{ height }}>טוען דגימה</div>}>
+          <Sample3D sym={sym} height={height} />
+        </Suspense>
+        <span className="sample-tag mono">{d.kind === 'gas' || d.kind === 'liquid' ? STATE_LABEL[d.state] : `${STATE_LABEL[d.state]} · ${KIND_LABEL[d.kind]}`}{d.glow ? ' · הזוהר שרואים בשפופרת' : ''}</span>
+      </div>
+      <h3>איפה פוגשים אותו</h3>
+      <ul className="uses">{d.uses.map((u) => <li key={u}>{u}</li>)}</ul>
+      {things.length > 0 && (
+        <div className="row">
+          <span className="eyebrow">נמצא ב</span>
+          {things.map((t) => <a key={t.id} className="chip" href={href('life', { a: t.id, el: sym })}>{t.name}</a>)}
+        </div>
+      )}
+    </section>
   )
 }
