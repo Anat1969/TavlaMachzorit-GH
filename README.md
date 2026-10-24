@@ -10,12 +10,15 @@
 - **מעבדת חומרים**: החלפת יסוד בתרכובת ידועה בשכן קרוב. ההחלפה מדורגת בשתי שכבות שקופות, היסטוריה ותכונות. השערות נשמרות עם הערות.
 - **טבלת נתונים**: כל היסודות, ממוינים ומקובצים, עם קישור מכל תא.
 
+האתר החי: https://anat1969.github.io/TavlaMachzorit-GH/
+
 ## הרצה
 ```
 npm install
 npm run dev            # פיתוח
 npm run build          # dist/ לפריסה
 npm run build:single   # dist-single/index.html: קובץ אחד עצמאי
+npm run deploy         # פריסה ל-GitHub Pages (ענף gh-pages)
 ```
 
 ## מבנה
