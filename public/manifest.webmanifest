@@ -1,0 +1,17 @@
+{
+  "name": "טבלה מחזורית · מעבדת הצורות",
+  "short_name": "טבלה מחזורית",
+  "description": "הטבלה המחזורית בשמונה סידורים: טבלה, ספירלה, גליל, קונוס, פירמידה קוונטית ועץ",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#06080f",
+  "theme_color": "#06080f",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
