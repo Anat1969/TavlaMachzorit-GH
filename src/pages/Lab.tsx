@@ -110,7 +110,7 @@ export function Lab({ params }: { params: URLSearchParams }) {
                   <NoteField value={h.note} onSave={(v) => hyp.update(h.id, v)} />
                   <div className="row">
                     <button className="chip" onClick={() => choose(h.formula)}>המשך ממנה</button>
-                    <button className="chip" onClick={() => { if (confirm(`למחוק את ההשערה ${h.formula}?`)) hyp.remove(h.id) }}>מחק</button>
+                    <DeleteButton onConfirm={() => hyp.remove(h.id)} />
                   </div>
                 </div>
               ))}
@@ -131,4 +131,12 @@ function NoteField({ value, onSave }: { value: string; onSave: (v: string) => vo
       onChange={(e) => { setV(e.target.value); clearTimeout(timer); const t = e.target.value; setTimer(window.setTimeout(() => onSave(t), 600)) }}
       onBlur={() => { clearTimeout(timer); if (v !== value) onSave(v) }} />
   )
+}
+
+// Two-step delete inside the page: the first click arms, the second deletes.
+function DeleteButton({ onConfirm }: { onConfirm: () => void }) {
+  const [armed, setArmed] = useState(false)
+  return armed
+    ? <button className="chip" style={{ borderColor: 'var(--c-alkali)' }} onClick={onConfirm} onBlur={() => setArmed(false)} autoFocus>לחצו שוב כדי למחוק</button>
+    : <button className="chip" onClick={() => setArmed(true)}>מחק</button>
 }
