@@ -39,7 +39,7 @@ function Cell({ e, colorBy, sel, dim, onPick }: { e: Element; colorBy: ColorBy; 
     <button
       className={`cell${sel ? ' sel' : ''}${dim ? ' dim' : ''}`}
       data-sym={e.sym}
-      style={{ ['--cell' as string]: colorOf(e, colorBy) }}
+      style={{ ['--cell' as string]: colorOf(e, colorBy), ['--i' as string]: e.z }}
       onClick={() => onPick(e.sym)}
       title={`${e.he} (${e.sym}), מספר אטומי ${e.z}`}
       aria-pressed={sel}

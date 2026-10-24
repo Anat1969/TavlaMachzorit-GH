@@ -42,7 +42,7 @@ export function ElementPanel({ sym, lens = 'compounds', colorBy = 'cat', onPick 
         <div key={el.sym} className="nb">
           <button className="chip sym-chip" style={{ ['--cell' as string]: colorOf(el, colorBy) }} onClick={() => onPick(el.sym)} title={`עבור ל${el.he}`}>{el.sym}</button>
           <span style={{ minWidth: 70 }}>{el.he}</span>
-          <span className="bar"><b style={{ width: `${Math.round(w * 100)}%` }} /></span>
+          <span className="bar"><b key={sym + lens} style={{ width: `${Math.round(w * 100)}%` }} /></span>
           <span className="mono small">{w.toFixed(2)}</span>
         </div>
       ))}

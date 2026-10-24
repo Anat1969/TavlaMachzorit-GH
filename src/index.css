@@ -168,6 +168,7 @@ textarea.field { width: 100%; resize: vertical; min-height: 64px; }
 .cell:hover { transform: translateY(-3px) scale(1.06); z-index: 3; box-shadow: 0 10px 22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.4); }
 .cell:active { transform: translateY(0) scale(1); box-shadow: var(--press); }
 .cell .z { position: absolute; top: 2px; left: 4px; font-family: var(--mono); font-size: clamp(7px, 0.6vw, 10px); opacity: 0.75; }
+.cell { background-color: var(--cell, #445); background-image: none; }
 .cell .s { font-weight: 600; font-size: clamp(10px, 1.25vw, 20px); line-height: 1; }
 .cell .n { font-size: clamp(6px, 0.55vw, 9px); opacity: 0.8; white-space: nowrap; overflow: hidden; max-width: 100%; }
 .cell.dim { opacity: 0.18; filter: saturate(0.3); }
@@ -261,6 +262,79 @@ main > .fill { flex-shrink: 1; }
 .steps div { padding: 14px; border-top: 2px solid var(--glow); }
 .steps div::before { counter-increment: s; content: '0' counter(s); font-family: var(--mono); color: var(--glow); font-size: 12px; }
 
+/* ---------- motion that explains ---------- */
+/* a line that draws itself from one element to another (needs pathLength="1") */
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes lit { 0% { transform: scale(1); } 40% { transform: scale(1.45); } 100% { transform: scale(1.12); } }
+@keyframes ripple { from { transform: scale(1); opacity: 0.8; } to { transform: scale(4.5); opacity: 0; } }
+@keyframes march { to { stroke-dashoffset: -0.12; } }
+@keyframes ringIn { 0% { opacity: 0; transform: scale(1.6); } 60% { opacity: 1; } 100% { opacity: 1; transform: scale(1); } }
+@keyframes grow { from { width: 0; } }
+@keyframes swapIn { 0% { transform: translateY(-60%) scale(0.6); opacity: 0; filter: brightness(2); } 60% { transform: translateY(6%) scale(1.06); opacity: 1; } 100% { transform: none; filter: none; } }
+
+.net-svg line { stroke-dasharray: 1; }
+.net-svg line.hot { animation: draw 0.7s ease-out both; }
+.net-svg line.surprise { stroke-dasharray: 0.04 0.02; animation: march 2.4s linear infinite; }
+.net-svg line.focus { stroke: var(--warn); stroke-opacity: 1; stroke-dasharray: 1; animation: draw 0.6s ease-out both; filter: drop-shadow(0 0 4px var(--warn)); }
+.net-svg line.faded { stroke-opacity: 0.08; }
+.net-svg .pop { transform-origin: 0 0; animation: pop 0.6s cubic-bezier(.2,.8,.3,1.2) both; }
+.net-svg .pop.lit { animation: lit 0.7s ease-out both; }
+.net-svg .pop.lit circle { stroke: var(--glow); stroke-width: 2.5; }
+.net-svg .ripple { fill: none; stroke: var(--glow); stroke-width: 2; transform-origin: 0 0; animation: ripple 1.4s ease-out both; pointer-events: none; }
+.net-svg .ripple.late { animation-delay: 0.35s; }
+.net-svg.as-table line { stroke-opacity: 0.5; }
+.net-mode { position: absolute; top: 10px; inset-inline-start: 10px; z-index: 2; display: flex; gap: 10px; align-items: center; max-width: calc(100% - 20px); flex-wrap: wrap; }
+.net-mode .muted { background: var(--glass-strong); padding: 2px 8px; }
+
+.threads path { fill: none; stroke: var(--glow); stroke-opacity: 0.85; stroke-linecap: round; stroke-dasharray: 1; animation: draw 0.8s ease-out both; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)); }
+.threads .ring, .logic .ring { fill: none; stroke: var(--glow); stroke-width: 2.5; transform-box: fill-box; transform-origin: center; animation: ringIn 0.5s ease-out both; }
+.threads .rank rect, .logic .badge rect { fill: var(--glow); stroke: var(--deep); stroke-width: 1.5; }
+.threads .rank text, .logic .badge text { font-family: var(--mono); font-size: 11px; font-weight: 600; fill: #0b1020; text-anchor: middle; dominant-baseline: central; }
+.threads .rank, .logic .badge { animation: fadeIn 0.35s both; }
+.logic .badge text { stroke: none; font-size: 12px; direction: ltr; }
+.logic .badge rect { fill: var(--rc); }
+.threads .wlabel { font-family: var(--mono); font-size: 11px; fill: var(--ink); paint-order: stroke; stroke: var(--deep); stroke-width: 4px; text-anchor: middle; animation: fadeIn 0.4s both; }
+
+.rel-svg .arc { stroke-dasharray: 1; animation: draw 0.9s ease-out both; }
+.logic .step { fill: none; stroke: var(--rc); stroke-width: 4; stroke-dasharray: 1; stroke-linecap: square; animation: draw 0.5s ease-in-out both; filter: drop-shadow(0 0 6px var(--rc)); }
+.logic .ring { stroke: var(--rc); }
+.logic-caption { border-inline-start: 4px solid var(--rc); }
+.logic-caption .lstep { display: inline-flex; gap: 6px; align-items: center; animation: fadeIn 0.4s both; }
+.logic-caption .lstep i { font-style: normal; font-family: var(--mono); font-size: 12px; font-weight: 600; color: #0b1020; background: var(--rc); width: 20px; height: 20px; display: inline-grid; place-items: center; }
+.logic-caption .lverdict { color: var(--rc); font-weight: 400; font-size: 16px; margin-top: 6px; animation: fadeIn 0.5s both; }
+.net-svg .node:focus { outline: none; }
+.net-svg .node:focus-visible circle { stroke: var(--glow); stroke-width: 3; }
+.logic text { font-family: var(--font); font-size: 13px; font-weight: 400; fill: var(--ink); paint-order: stroke; stroke: var(--deep); stroke-width: 5px; text-anchor: middle; direction: rtl; animation: fadeIn 0.4s both; }
+.logic .verdict { font-weight: 600; font-size: 14px; fill: var(--rc); }
+
+.spiral-line { stroke-dasharray: 1; animation: draw 2.4s ease-in-out both; }
+.spiral-svg .pop { transform-origin: 0 0; animation: pop 0.45s ease-out both; }
+.spiral-svg .pop.lit { animation: lit 0.6s ease-out both; }
+.family-line { fill: none; stroke: var(--ink); stroke-width: 3; stroke-dasharray: 1; stroke-linejoin: round; animation: draw 1s ease-in-out both; filter: drop-shadow(0 0 5px var(--glow)); }
+.spiral-svg .family-label { fill: var(--glow); font-size: 12px; font-weight: 400; direction: rtl; animation: fadeIn 0.5s 0.6s both; }
+
+.nb .bar b { animation: grow 0.7s ease-out both; }
+.swap-formula { display: flex; gap: 4px; align-items: flex-end; font-size: 40px; font-weight: 300; line-height: 1; }
+.swap-formula .slot { display: inline-flex; align-items: baseline; padding: 4px 8px; border: 1px solid transparent; }
+.swap-formula .slot.target { border-color: var(--rim-strong); background: color-mix(in srgb, var(--cell) 22%, transparent); }
+.swap-formula .slot.swapped { animation: swapIn 0.45s cubic-bezier(.2,.8,.3,1.2) both; border-color: var(--accent); box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 50%, transparent); }
+.swap-formula sub { font-size: 0.5em; }
+.layers { display: grid; gap: 2px; margin: 3px 0; max-width: 220px; }
+.layers i, .layers b { display: block; height: 4px; animation: grow 0.6s ease-out both; }
+.layers i { background: var(--glow); }
+.layers b { background: var(--warn); }
+.cand { transition: background 0.15s; }
+.cand:hover, .cand:focus-within { background: rgba(124,196,255,0.07); }
+
+/* colour flows through the table in atomic-number order, revealing the periodic trend */
+.cell { transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.3s, filter 0.3s, background-color 0.5s ease calc(var(--i, 0) * 7ms); }
+
+.hn-edge { stroke-dasharray: 1; animation: draw 0.8s ease-out both; }
+.hn-far { stroke-dasharray: 0.06 0.04; animation: fadeIn 0.6s both, march 2.4s linear infinite; }
+.hn-node { animation: pop 0.6s ease-out both; }
+
 /* toast */
 .toast { position: fixed; bottom: 20px; left: 20px; z-index: 50; padding: 10px 16px; font-size: 14px; border-inline-start: 3px solid var(--accent); }
 .toast.err { border-color: var(--c-alkali); }
@@ -274,6 +348,7 @@ main > .fill { flex-shrink: 1; }
   .shell.fit .split > .stack { overflow: auto; }
   /* the classic grid scales to the screen height so all 10 rows stay visible */
   .shell.fit .grid-wrap { max-width: calc((100vh - 400px) * 1.72); margin-inline: auto; }
+  .shell.fit .has-caption .grid-wrap { max-width: calc((100vh - 510px) * 1.72); }
 }
 
 /* ---------- responsive ---------- */

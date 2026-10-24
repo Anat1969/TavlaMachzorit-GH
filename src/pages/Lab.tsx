@@ -18,6 +18,7 @@ export function Lab({ params }: { params: URLSearchParams }) {
   const index = Math.min(pos, Math.max(0, parts.length - 1))
   const cands = useMemo(() => (valid ? candidates(parts, index, 12) : []), [parts, index, valid])
   const [draft, setDraft] = useState(formula)
+  const [preview, setPreview] = useState<string | null>(null) // candidate symbol shown in the formula
   const hyp = useHypotheses()
   const containing = el ? COMPOUNDS.filter((c) => c.parts.some((p) => p[0] === el)).slice(0, 24) : []
 
@@ -58,7 +59,17 @@ export function Lab({ params }: { params: URLSearchParams }) {
               <div className="row" style={{ justifyContent: 'space-between' }}>
                 <div>
                   <div className="eyebrow">{FORMULA_SET.has(formula) ? 'תרכובת ידועה במאגר' : 'נוסחה מחוץ למאגר'}</div>
-                  <div style={{ fontSize: 40, fontWeight: 200, direction: 'ltr', textAlign: 'right' }}>{prettyFormula(formula)}</div>
+                  <div className="swap-formula" dir="ltr" aria-live="polite">
+                    {parts.map(([sym, n], i) => {
+                      const shownSym = i === index && preview ? preview : sym
+                      const swapped = i === index && !!preview
+                      return (
+                        <span key={i + shownSym} className={`slot${i === index ? ' target' : ''}${swapped ? ' swapped' : ''}`} style={{ ['--cell' as string]: colorOf(BY_SYM.get(shownSym)!) }}>
+                          {shownSym}{n > 1 && <sub>{n}</sub>}
+                        </span>
+                      )
+                    })}
+                  </div>
                 </div>
                 <div className="row" role="group" aria-label="איזה יסוד להחליף">
                   <span className="eyebrow">להחליף את</span>
@@ -69,7 +80,7 @@ export function Lab({ params }: { params: URLSearchParams }) {
               </div>
               <p className="small muted" style={{ margin: 0 }}>
                 ציון = {W_HISTORY} × היסטוריה + {W_PROPERTY} × תכונות. שתי השכבות מוצגות בנפרד, כדי שתוכלו לראות כשהן חלוקות.
-                הסימון "השערה" אומר רק שהנוסחה לא נמצאת במדגם: ייתכן שהחומר כבר ידוע בספרות, או שאינו יציב.
+                רחפו על מועמד כדי לראות את ההחלפה בנוסחה. הפס העליון הוא ההיסטוריה והתחתון התכונות. הסימון "השערה" אומר רק שהנוסחה לא נמצאת במדגם: ייתכן שהחומר כבר ידוע בספרות, או שאינו יציב.
               </p>
             </div>
             <div className="glass">
@@ -77,13 +88,14 @@ export function Lab({ params }: { params: URLSearchParams }) {
               {cands.map((c) => {
                 const e = BY_SYM.get(c.sym)!
                 return (
-                  <div key={c.sym} className="cand">
+                  <div key={c.sym} className="cand" onMouseEnter={() => setPreview(c.sym)} onMouseLeave={() => setPreview(null)} onFocus={() => setPreview(c.sym)} onBlur={() => setPreview(null)}>
                     <a className="chip sym-chip" href={href('matrix', { el: c.sym, lens: 'compounds' })} style={{ ['--cell' as string]: colorOf(e) }} title={`${e.he} במטריצה`}>{c.sym}</a>
                     <div style={{ minWidth: 0 }}>
                       <div className="row">
                         <span className="formula" dir="ltr">{prettyFormula(c.formula)}</span>
                         {c.known ? <span className="tag known">ידוע במאגר</span> : <span className="tag new">השערה</span>}
                       </div>
+                      <div className="layers" aria-hidden><i style={{ width: `${c.history * 100}%` }} /><b style={{ width: `${c.property * 100}%` }} /></div>
                       <div className="small faint mono">היסטוריה {c.history.toFixed(2)} · תכונות {c.property.toFixed(2)}{c.evidence.length > 0 && <> · <span dir="ltr">{c.evidence.map(prettyFormula).join('  ')}</span></>}</div>
                     </div>
                     <span className="mono">{c.score.toFixed(2)}</span>

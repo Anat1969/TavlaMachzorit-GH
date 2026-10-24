@@ -23,6 +23,11 @@ function polar(z: number) {
 export function Spiral({ params }: { params: URLSearchParams }) {
   const colorBy = (params.get('color') as ColorBy) || 'cat'
   const sel = params.get('el')
+  const selEl = sel ? ELEMENTS.find((e) => e.sym === sel) : undefined
+  // the family of the chosen element: same column, or the same place in the f-block row
+  const family = selEl ? ELEMENTS.filter((e) => (selEl.group ? e.group === selEl.group : e.group === null && e.col === selEl.col)) : []
+  const famSet = new Set(family.map((e) => e.sym))
+  const famPath = family.map((e) => polar(e.z)).map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
   const path = ELEMENTS.map((e) => polar(e.z)).map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
   return (
     <>
@@ -30,7 +35,7 @@ export function Spiral({ params }: { params: URLSearchParams }) {
         <div>
           <div className="eyebrow">סידור 4: ספירלה</div>
           <h1>רצף אחד, בלי חיתוכים</h1>
-          <p>בטבלה הרגילה כל שורה נחתכת, והלנתנידים "מוצאים החוצה". בספירלה כל מחזור הוא סיבוב, הגזים האצילים יושבים על קרן אחת למעלה, ומשפחות שלמות נפתחות כמו מניפה.</p>
+          <p>בטבלה הרגילה כל שורה נחתכת, והלנתנידים "מוצאים החוצה". בספירלה כל מחזור הוא סיבוב, הגזים האצילים יושבים על קרן אחת למעלה, ומשפחות שלמות נפתחות כמו מניפה. בחרו יסוד, וקו יחבר את כל בני המשפחה שלו מסיבוב לסיבוב: זה המכנה המשותף שחוזר בכל מחזור.</p>
         </div>
       </div>
       <div className="glass panel row" style={{ justifyContent: 'space-between' }}>
@@ -40,19 +45,26 @@ export function Spiral({ params }: { params: URLSearchParams }) {
       <div className="split fill">
         <div className="glass panel" style={{ minHeight: 0, display: 'flex' }}>
           <svg className="spiral-svg" viewBox="-385 -385 770 770" role="img" aria-label="ספירלה של היסודות לפי מספר אטומי">
-            <path d={path} fill="none" stroke="var(--rim-strong)" strokeWidth="1.5" />
+            <path className="spiral-line" d={path} fill="none" stroke="var(--rim-strong)" strokeWidth="1.5" pathLength={1} />
+            {family.length > 1 && <path key={'f' + sel} className="family-line" d={famPath} pathLength={1} />}
             {ELEMENTS.map((e) => {
               const p = polar(e.z), s = p.size
               return (
                 <g key={e.sym} className="tile" transform={`translate(${p.x},${p.y})`} onClick={() => setParam('el', e.sym === sel ? null : e.sym)}
-                  role="button" tabIndex={0} aria-label={`${e.he}, ${CAT_LABEL[e.cat]}`} onKeyDown={(ev) => ev.key === 'Enter' && setParam('el', e.sym)} opacity={sel && sel !== e.sym ? 0.55 : 1}>
+                  role="button" tabIndex={0} aria-label={`${e.he}, ${CAT_LABEL[e.cat]}`} onKeyDown={(ev) => ev.key === 'Enter' && setParam('el', e.sym)} opacity={sel && !famSet.has(e.sym) ? 0.4 : 1}>
                   <title>{e.he}</title>
+                  <g className={`pop${famSet.has(e.sym) && sel ? ' lit' : ''}`} key={famSet.has(e.sym) ? e.sym + sel : e.sym}
+                    style={{ animationDelay: famSet.has(e.sym) && sel ? `${family.indexOf(e) * 120 + 200}ms` : `${e.z * 9}ms` }}>
                   <rect x={-s / 2} y={-s / 2} width={s} height={s} fill={colorOf(e, colorBy)} strokeWidth={sel === e.sym ? 3 : 1} stroke={sel === e.sym ? 'var(--ink)' : undefined} />
                   <text style={{ fontSize: Math.min(15, s * 0.46) }}>{e.sym}</text>
+                  </g>
                 </g>
               )
             })}
-            <text x="0" y="0" style={{ fill: 'var(--ink-soft)', fontSize: 13, fontWeight: 300 }}>H → Og</text>
+            <text x="0" y="-8" style={{ fill: 'var(--ink-soft)', fontSize: 13, fontWeight: 300 }}>H → Og</text>
+            {selEl && family.length > 1 && (
+              <text key={'t' + sel} className="family-label" x="0" y="12">{selEl.group ? `טור ${selEl.group}: ${selEl.valence} אלקטרוני ערכיות` : 'אותו מקום בגוש f'}</text>
+            )}
           </svg>
         </div>
         <div className="stack">

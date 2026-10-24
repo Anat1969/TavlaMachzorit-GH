@@ -21,10 +21,10 @@ export function HeroNet() {
       {EDGES.map(([a, b]) => {
         const [x1, y1] = pos.get(a)!, [x2, y2] = pos.get(b)!
         const far = (a === 'Na' && b === 'Ag') || (a === 'Rb' && b === 'Tl') || (a === 'In' && b === 'La')
-        return <line key={a + b} x1={x1} y1={y1} x2={x2} y2={y2} stroke={far ? 'var(--warn)' : 'var(--ink-faint)'} strokeOpacity={far ? 0.9 : 0.45} strokeWidth={far ? 2.2 : 1.4} strokeDasharray={far ? '5 4' : undefined} />
+        return <line key={a + b} className={far ? 'hn-far' : 'hn-edge'} x1={x1} y1={y1} x2={x2} y2={y2} pathLength={1} stroke={far ? 'var(--warn)' : 'var(--ink-faint)'} strokeOpacity={far ? 0.9 : 0.45} strokeWidth={far ? 2.2 : 1.4} style={{ animationDelay: `${far ? 1400 : 300 + EDGES.findIndex((e) => e[0] === a && e[1] === b) * 40}ms` }} />
       })}
-      {NODES.map(([s, x, y]) => (
-        <g key={s}>
+      {NODES.map(([s, x, y], i) => (
+        <g key={s} className="hn-node" style={{ animationDelay: `${i * 50}ms`, transformOrigin: `${x}px ${y}px` }}>
           <circle cx={x} cy={y + 6} r={19} fill="#000" opacity="0.25" />
           <circle cx={x} cy={y} r={19} fill={colorOf(BY_SYM.get(s)!)} stroke="rgba(0,0,0,.35)" />
           <circle cx={x} cy={y} r={19} fill="url(#hg)" />
