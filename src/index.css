@@ -393,6 +393,29 @@ main > .fill { flex-shrink: 1; }
 @keyframes stretch { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .net-svg .gloss { pointer-events: none; }
 
+/* rings (Mayan arrangement) */
+.rings-svg .ring { fill: none; stroke: var(--muted-stone); stroke-opacity: 0.5; stroke-width: 1; animation: fadeIn 0.8s both; }
+.noble-line { stroke: var(--accent-lantern); stroke-width: 2; stroke-dasharray: 1; animation: draw 1.2s ease-out both; filter: drop-shadow(0 0 6px rgba(232, 165, 75, 0.6)); }
+.noble-label { fill: var(--text-muted); font-family: var(--mono); font-size: 12px; text-anchor: middle; direction: rtl; }
+.walk { pointer-events: none; }
+.walk path { fill: none; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1; animation: draw 1s ease-in-out both; }
+.walk.side-a path { stroke: var(--glow); filter: drop-shadow(0 0 5px var(--glow)); }
+.walk.side-b path { stroke: var(--warn); filter: drop-shadow(0 0 5px var(--warn)); }
+.walk .stop { animation: fadeIn 0.35s both; }
+.walk .stop circle { stroke: var(--deep); stroke-width: 1.5; }
+.walk.side-a .stop circle { fill: var(--glow); }
+.walk.side-b .stop circle { fill: var(--warn); }
+.walk .stop text { font-family: var(--mono); font-size: 11px; font-weight: 600; fill: #1a1510; text-anchor: middle; dominant-baseline: central; }
+.pick-row { display: flex; align-items: center; gap: 8px; padding: 4px 0 4px 0; border-inline-start: 3px solid var(--glow); padding-inline-start: 8px; margin-bottom: 6px; }
+.pick-row.side-b { border-color: var(--warn); }
+.prediction { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rim); }
+.prediction .balance { font-size: 15px; color: var(--ink); text-align: right; }
+.rings-points { margin: 0; padding-inline-start: 18px; display: grid; gap: 8px; }
+.rings-points b { color: var(--ink); font-weight: 500; }
+.src-link { color: var(--mist); }
+.net-svg .ring-guide { fill: none; stroke: var(--muted-stone); stroke-opacity: 0.45; animation: fadeIn 0.8s both; }
+.net-svg .noble-line { stroke-width: 1.5; }
+
 /* toast */
 .toast { position: fixed; bottom: 20px; left: 20px; z-index: 50; padding: 10px 16px; font-size: 14px; border-inline-start: 3px solid var(--mist); }
 .toast.err { border-color: var(--muted-stone); }
