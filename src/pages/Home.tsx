@@ -15,7 +15,7 @@ const VIEWS = [
 export function Home() {
   return (
     <>
-      <section className="hero">
+      <section className="hero anchor">
         <div>
           <div className="eyebrow">מעבר לרשימה</div>
           <h1>הטבלה המחזורית<br />כרשת של קשרים</h1>
@@ -35,7 +35,7 @@ export function Home() {
       </section>
 
       <section className="stack">
-        <h2 style={{ fontWeight: 300, margin: '16px 0 0' }}>שישה סידורים לאותם 118 יסודות</h2>
+        <h2 className="home-h2">שישה סידורים לאותם 118 יסודות</h2>
         <div className="cards">
           {VIEWS.map((v, i) => (
             <a key={v.id} className="card glass" href={href(v.id)}>
@@ -48,7 +48,7 @@ export function Home() {
       </section>
 
       <section className="stack">
-        <h2 style={{ fontWeight: 300, margin: '16px 0 0' }}>איך נבנית הרשת</h2>
+        <h2 className="home-h2">איך נבנית הרשת</h2>
         <div className="steps">
           <div className="glass"><h3>אוספים היסטוריה כימית</h3><p className="muted small">{COMPOUNDS.length} תרכובות בינאריות מוכרות, כמו NaCl, GaAs ו-MoS₂.</p></div>
           <div className="glass"><h3>מחלצים תבניות</h3><p className="muted small">מכל תרכובת מוציאים יסוד אחד ומשאירים תבנית: NaCl נותן "□Cl". יסודות שממלאים אותן תבניות הם שכנים.</p></div>

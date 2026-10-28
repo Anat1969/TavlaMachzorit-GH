@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { href, useRoute } from './lib/router'
 import { useToast } from './lib/store'
 import { Home } from './pages/Home'
@@ -28,18 +28,7 @@ export const PAGES = [
 export function App() {
   const route = useRoute()
   const t = useToast()
-  const [theme, setTheme] = useState<string | null>(() => { try { return localStorage.getItem('tavla.theme') } catch { return null } })
-  useEffect(() => {
-    if (theme) document.documentElement.dataset.theme = theme
-    else delete document.documentElement.dataset.theme
-  }, [theme])
   useEffect(() => { window.scrollTo(0, 0) }, [route.page])
-  const toggleTheme = () => {
-    const dark = theme ? theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
-    const next = dark ? 'light' : 'dark'
-    setTheme(next)
-    try { localStorage.setItem('tavla.theme', next) } catch { /* theme is a convenience only */ }
-  }
   const p = route.params
   const page = (() => {
     switch (route.page) {
@@ -67,7 +56,6 @@ export function App() {
           ))}
         </nav>
         <div className="top-tools">
-          <button className="chip" onClick={toggleTheme} title="מעבר בין מצב בהיר לכהה">בהיר / כהה</button>
           <ai-menu project="TavlaMachzorit-GH"><span className="logo-btn">אד' ענת שטיבלמן A&amp;I</span></ai-menu>
         </div>
       </header>
@@ -78,14 +66,14 @@ export function App() {
 }
 
 export function AppMark() {
-  // the app icon: a small molecule-like network on a tile
+  // the app icon: a small network on a dusk tile; one amber node is the anchor
   const pts = [[8, 22], [16, 8], [24, 22], [16, 16]]
   return (
     <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden>
       <rect x="1" y="1" width="30" height="30" fill="url(#bm)" />
-      <defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#6fa8ff" /><stop offset="1" stopColor="#c79bff" /></linearGradient></defs>
-      {[[0, 3], [1, 3], [2, 3], [0, 1], [1, 2]].map(([a, b], i) => <line key={i} x1={pts[a][0]} y1={pts[a][1]} x2={pts[b][0]} y2={pts[b][1]} stroke="#0b1020" strokeWidth="1.6" />)}
-      {pts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i === 3 ? 3.2 : 2.6} fill="#fff" stroke="#0b1020" strokeWidth="1.2" />)}
+      <defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#3b4b5c" /><stop offset="1" stopColor="#2a3541" /></linearGradient></defs>
+      {[[0, 3], [1, 3], [2, 3], [0, 1], [1, 2]].map(([a, b], i) => <line key={i} x1={pts[a][0]} y1={pts[a][1]} x2={pts[b][0]} y2={pts[b][1]} stroke="#a9b3ba" strokeWidth="1.4" />)}
+      {pts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i === 3 ? 3.2 : 2.6} fill={i === 3 ? '#e8a54b' : '#ede6da'} stroke="#2a3541" strokeWidth="1.2" />)}
     </svg>
   )
 }
