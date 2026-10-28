@@ -9,6 +9,7 @@ import { Chips } from '../components/Chips'
 import { Legend } from '../components/Legend'
 import { ElementPanel } from '../components/ElementPanel'
 import { useTween } from '../lib/motion'
+import { ringPos, RING_R, VIEW } from '../lib/mayan'
 
 const Network3D = lazy(() => import('../three/Network3D'))
 
@@ -53,11 +54,20 @@ function tableLayout(ids: string[], box: number[]) {
   }))
 }
 
+// Ring (Mayan) coordinates inside the same box: every period a ring, noble gases on the top line.
+function ringLayout(ids: string[], box: number[]) {
+  const [x0, y0, w, h] = box
+  const top = 50 // keep clear of the mode switch
+  const k = Math.min(w, h - top) / 2 / (VIEW + 10)
+  const cx = x0 + w / 2, cy = y0 + top + (h - top) / 2
+  return { k, cx, cy, pos: new Map(ids.map((id) => { const p = ringPos(BY_SYM.get(id)!); return [id, { x: cx + p.x * k, y: cy + p.y * k }] })) }
+}
+
 export function Network({ params }: { params: URLSearchParams }) {
   const lens = (params.get('lens') as Lens) || 'compounds'
   const colorBy = (params.get('color') as ColorBy) || (lens === 'geo' ? 'geo' : 'cat')
   const sel = params.get('el')
-  const view = (['table', '3d'].includes(params.get('view') ?? '') ? params.get('view') : 'net') as 'net' | 'table' | '3d'
+  const view = (['table', '3d', 'ring'].includes(params.get('view') ?? '') ? params.get('view') : 'net') as 'net' | 'table' | '3d' | 'ring'
   const narrow = useNarrow()
   const L0 = useMemo(() => layout(lens), [lens])
   // on a portrait phone screen, turn a landscape layout on its side so nodes stay readable
@@ -68,8 +78,9 @@ export function Network({ params }: { params: URLSearchParams }) {
   }, [L0, narrow])
   const tablePos = useMemo(() => tableLayout(L.nodes.map((n) => n.id), L.box), [L])
   const netPos = useMemo(() => new Map(L.nodes.map((n) => [n.id, { x: n.x!, y: n.y! }])), [L])
+  const ring = useMemo(() => ringLayout(L.nodes.map((n) => n.id), L.box), [L])
   // first visit: elements leave their seats in the table and gather into the network
-  const shown = useTween(view === 'table' ? tablePos : netPos, 1400, tablePos)
+  const shown = useTween(view === 'table' ? tablePos : view === 'ring' ? ring.pos : netPos, 1400, tablePos)
   const ids = useMemo(() => L0.nodes.map((n) => n.id), [L0])
   const cellR = Math.min(L.box[2] / 18, L.box[3] / 10.6) * 0.42
 
@@ -106,9 +117,10 @@ export function Network({ params }: { params: URLSearchParams }) {
             <div className="row" role="group" aria-label="אופן תצוגה">
               <button className="chip" aria-pressed={view === 'net'} onClick={() => setParam('view', null)}>רשת</button>
               <button className="chip" aria-pressed={view === 'table'} onClick={() => setParam('view', 'table')}>על הטבלה</button>
+              <button className="chip" aria-pressed={view === 'ring'} onClick={() => setParam('view', 'ring')}>עגול</button>
               <button className="chip" aria-pressed={view === '3d'} onClick={() => setParam('view', '3d')}>תלת־ממד</button>
             </div>
-            <span className="small muted">{view === 'table' ? 'אותם קשרים, על הטבלה הרגילה: כל קו ארוך הוא דמיון שהטבלה מפרידה.' : view === '3d' ? 'כל כדור עשוי מהחומר האמיתי של היסוד: מתכת מלוטשת, זכוכית עם גז זוהר. גררו כדי לסובב.' : 'המיקום נקבע רק לפי דמיון. יסודות דומים נמשכים זה לזה.'}</span>
+            <span className="small muted">{view === 'table' ? 'אותם קשרים, על הטבלה הרגילה: כל קו ארוך הוא דמיון שהטבלה מפרידה.' : view === 'ring' ? 'כל מחזור הוא טבעת, והגזים האצילים על הקו העליון. קו שחוצה את המרכז מחבר יסודות דומים משני צדי הקו.' : view === '3d' ? 'כל כדור עשוי מהחומר האמיתי של היסוד: מתכת מלוטשת, זכוכית עם גז זוהר. גררו כדי לסובב.' : 'המיקום נקבע רק לפי דמיון. יסודות דומים נמשכים זה לזה.'}</span>
           </div>
           {view === '3d' && (
             <Suspense fallback={<div className="net3d loading">טוען תלת־ממד</div>}>
@@ -125,6 +137,12 @@ export function Network({ params }: { params: URLSearchParams }) {
                 <stop offset="1" stopColor="#000" stopOpacity="0.35" />
               </radialGradient>
             </defs>
+            {view === 'ring' && (
+              <g key="ring-guides">
+                {[1, 2, 3, 4, 5, 6, 7].map((p) => <circle key={p} className="ring-guide" cx={ring.cx} cy={ring.cy} r={RING_R(p) * ring.k} />)}
+                <line className="noble-line" x1={ring.cx} y1={ring.cy - RING_R(1) * ring.k} x2={ring.cx} y2={ring.cy - (RING_R(7) + 18) * ring.k} pathLength={1} />
+              </g>
+            )}
             {L.edges.map((e) => {
               const a = at(e.a), b = at(e.b)
               const key = e.a + '|' + e.b
@@ -142,7 +160,7 @@ export function Network({ params }: { params: URLSearchParams }) {
             {L.nodes.map((n, i) => {
               const el = BY_SYM.get(n.id)!
               const p = at(n.id)
-              const r = view === 'table' ? cellR : 10 + Math.min(6, n.deg)
+              const r = view === 'table' ? cellR : view === 'ring' ? Math.min(10 + Math.min(6, n.deg), ringPos(el).size * ring.k * 0.55) : 10 + Math.min(6, n.deg)
               const lit = rank.has(n.id)
               const dim = (near && !near.has(n.id)) || (pairNodes && !pairNodes.has(n.id))
               return (
