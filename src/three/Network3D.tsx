@@ -42,7 +42,7 @@ export default function Network3D({ ids, edges, sel, near, surprise, colorBy, on
     const renderer = studioRenderer(canvas)
     const scene = new THREE.Scene()
     scene.environment = studioEnvironment(renderer)
-    scene.fog = new THREE.Fog(0x0b1020, 14, 40)
+    scene.fog = new THREE.Fog(0x2a3541, 14, 40)
     renderer.toneMappingExposure = 1.35
     studioLights(scene)
 
