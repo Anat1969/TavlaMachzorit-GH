@@ -20,8 +20,9 @@
 - לא ממציאים נתונים. ערך לא ידוע נשאר null, ומוצג בממשק כ"אין נתון".
 
 ## כתובת ופריסה
-- האתר החי: https://anat1969.github.io/TavlaMachzorit-GH/
-- פריסה: `npm run deploy` (בנייה ודחיפת dist לענף gh-pages). Pages מוגש מהענף, לא מ-Actions.
+- הכתובת הראשית: https://tavla-machzorit.vercel.app (Vercel, פריסה אוטומטית ממיזוג לענף ברירת המחדל).
+- כתובת גיבוי: https://anat1969.github.io/TavlaMachzorit-GH/
+- GitHub Pages: `npm run deploy` (בנייה ודחיפת dist לענף gh-pages). Pages מוגש מהענף, לא מ-Actions.
 
 ## יומן תיקונים
 - 2026-10-24: בנייה ראשונה. שישה סידורים, ארבע עדשות רשת, מעבדת החלפות עם השערות שמורות, ו-PWA.
