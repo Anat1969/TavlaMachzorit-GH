@@ -11,6 +11,7 @@ import {
   inventionsFor, NEEDS, MP_URL, SCHOLAR_URL, type Invention,
 } from '../lib/insights'
 import { Rich, LayerTag, LayerLegend } from '../components/Rich'
+import { StabilityBadge } from '../components/Stability'
 
 const pct = (x: number) => Math.round(x * 100)
 
@@ -269,6 +270,7 @@ function Idea({ x, i }: { x: Invention; i: number }) {
       <div className="layers" aria-label={`היסטוריה ${x.history.toFixed(2)}, תכונות ${x.property.toFixed(2)}`}><i style={{ width: `${x.history * 100}%` }} /><b style={{ width: `${x.property * 100}%` }} /></div>
       <div className="small faint mono">היסטוריה {x.history.toFixed(2)} · תכונות {x.property.toFixed(2)} · ציון {x.score.toFixed(2)}</div>
       {x.agree ? <span className="small sig-good">שתי השכבות מסכימות</span> : <span className="small sig-bad">רק שכבה אחת תומכת. השערה חלשה.</span>}
+      <div className="row small"><span className="faint">השופט השני:</span><StabilityBadge parts={parseFormula(x.formula)} full /></div>
       <div className="row">
         <a className="btn" href={href('lab', { f: x.parent, el: x.replaced })}>פתח במעבדה</a>
         <button className="btn" disabled={saved} onClick={() => hyp.add({ formula: x.formula, template: x.parent, replaced: x.replaced, by: x.by, score: x.score })}>{saved ? 'נשמר' : 'שמור השערה'}</button>

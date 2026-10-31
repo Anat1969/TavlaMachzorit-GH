@@ -10,6 +10,7 @@
 import { ELEMENTS, BY_SYM, type Element } from '../data/elements'
 import { COMPOUNDS, FORMULA_SET, formatFormula } from '../data/compounds'
 import { hops } from './mayan'
+import { lookup, status, type Status, type MPEntry } from './stability'
 
 export interface Atom { id: string; label: string; family: string; test: (x: Element, y: Element, role: Role, partner: Element) => boolean }
 type Role = 'giver' | 'taker' // X is the less (giver) or more (taker) electronegative partner
@@ -41,7 +42,7 @@ export const ATOM = new Map(ATOMS.map((a) => [a.id, a]))
 
 // ---------- the experiment table: every possible swap, computed once ----------
 
-interface Swap { from: string; to: string; x: string; y: string; hit: boolean }
+interface Swap { from: string; to: string; x: string; y: string; hit: boolean; mp: MPEntry | null; st: Status }
 // Helium, neon and argon have no stable compounds, so they are not candidates for any swap.
 const pool = ELEMENTS.filter((e) => e.known && !['He', 'Ne', 'Ar'].includes(e.sym))
 const SWAPS: Swap[] = []
@@ -58,8 +59,10 @@ for (const c of COMPOUNDS) {
     const role: Role = (x.en ?? 0) <= (other.en ?? 0) ? 'giver' : 'taker'
     for (const y of pool) {
       if (y.sym === s0 || y.sym === s1) continue
-      const to = formatFormula(c.parts.map((p, j) => (j === i ? [y.sym, p[1]] : p)) as [string, number][])
-      SWAPS.push({ from: c.formula, to, x: s, y: y.sym, hit: FORMULA_SET.has(to) })
+      const parts = c.parts.map((p, j) => (j === i ? [y.sym, p[1]] : p)) as [string, number][]
+      const to = formatFormula(parts)
+      const mp = lookup(parts)
+      SWAPS.push({ from: c.formula, to, x: s, y: y.sym, hit: FORMULA_SET.has(to), mp, st: status(mp) })
       ROLE.push(role)
       PARTNER.push(other)
     }
@@ -87,11 +90,14 @@ export interface RuleResult {
   f1: number
   examples: { from: string; to: string }[]
   misses: { from: string; to: string }[]
+  // the second judge: of the swaps outside the sample, what the stability calculation says
+  outside: number; mpOk: number; mpBad: number; mpAbsent: number
+  reality: number // (sample hits + computed stable or near-stable) / allowed
 }
 
 export function evaluate(ids: string[]): RuleResult {
   const cols = ids.map((id) => COLS.get(id)!).filter(Boolean)
-  let allowed = 0, hits = 0
+  let allowed = 0, hits = 0, mpOk = 0, mpBad = 0, mpAbsent = 0
   const examples: RuleResult['examples'] = [], misses: RuleResult['misses'] = []
   for (let k = 0; k < N; k++) {
     let ok = true
@@ -100,11 +106,17 @@ export function evaluate(ids: string[]): RuleResult {
     allowed++
     const s = SWAPS[k]
     if (s.hit) { hits++; if (examples.length < 6 && k % 7 === 0) examples.push({ from: s.from, to: s.to }) }
-    else if (misses.length < 6 && k % 11 === 0) misses.push({ from: s.from, to: s.to })
+    else if (s.st === 'stable' || s.st === 'meta') mpOk++
+    else if (s.st === 'unstable') mpBad++
+    else mpAbsent++
+    if (!s.hit && s.st === 'unstable' && misses.length < 6 && k % 3 === 0) misses.push({ from: s.from, to: s.to })
   }
   const precision = allowed ? hits / allowed : 0
   const recall = hits / HITS
-  return { ids, allowed, hits, precision, recall, lift: precision / EXPERIMENT.base, f1: precision + recall ? (2 * precision * recall) / (precision + recall) : 0, examples, misses }
+  return {
+    ids, allowed, hits, precision, recall, lift: precision / EXPERIMENT.base, f1: precision + recall ? (2 * precision * recall) / (precision + recall) : 0, examples, misses,
+    outside: allowed - hits, mpOk, mpBad, mpAbsent, reality: allowed ? (hits + mpOk) / allowed : 0,
+  }
 }
 
 // ---------- the search: every single condition, every pair, the best triples ----------
@@ -146,10 +158,10 @@ export function pareto(rules: RuleResult[]) {
 
 export const ruleText = (ids: string[]) => ids.map((id) => ATOM.get(id)?.label ?? id).join(' + ')
 
-/** What a rule predicts that the sample does not contain: its inventions, with the rule's own hit rate as the estimate. */
-export function predictions(ids: string[], n = 8) {
+/** What a rule predicts outside the sample, sorted by what the stability calculation says about each formula. */
+export function predictions(ids: string[], n = 6) {
   const cols = ids.map((id) => COLS.get(id)!).filter(Boolean)
-  const out: { from: string; to: string; x: string; y: string }[] = []
+  const out: Swap[] = []
   const seen = new Set<string>()
   for (let k = 0; k < N; k++) {
     if (SWAPS[k].hit) continue
@@ -159,10 +171,18 @@ export function predictions(ids: string[], n = 8) {
     seen.add(SWAPS[k].to)
     out.push(SWAPS[k])
   }
-  // spread the list over many parent compounds instead of twelve variants of one
-  const byParent = new Map<string, typeof out>()
-  for (const p of out) { if (!byParent.has(p.from)) byParent.set(p.from, []); byParent.get(p.from)!.push(p) }
-  const spread: typeof out = []
-  for (let round = 0; spread.length < n && round < 4; round++) for (const list of byParent.values()) { if (list[round] && spread.length < n) spread.push(list[round]) }
-  return { total: out.length, list: spread }
+  // spread each list over many parent compounds instead of twelve variants of one
+  const spread = (list: Swap[]) => {
+    const byParent = new Map<string, Swap[]>()
+    for (const p of list) { if (!byParent.has(p.from)) byParent.set(p.from, []); byParent.get(p.from)!.push(p) }
+    const res: Swap[] = []
+    for (let round = 0; res.length < n && round < 4; round++) for (const l of byParent.values()) if (l[round] && res.length < n) res.push(l[round])
+    return res
+  }
+  const ok = out.filter((p) => p.st === 'stable' || p.st === 'meta')
+  const bad = out.filter((p) => p.st === 'unstable').sort((a, b) => a.mp!.ehull - b.mp!.ehull)
+  const open = out.filter((p) => p.st === 'absent')
+  return { total: out.length, ok: spread(ok), okN: ok.length, bad: spread(bad), badN: bad.length, open: spread(open), openN: open.length }
 }
+
+export type Prediction = Swap

@@ -5,6 +5,9 @@ import { useHypotheses } from '../lib/store'
 import { reducedMotion } from '../lib/motion'
 import { ATOMS, ATOM, EXPERIMENT, evaluate, search, pareto, predictions, ruleText, type RuleResult } from '../lib/rulegen'
 import { MP_URL } from '../lib/insights'
+import { CALIBRATION, MP_COUNT, MP_BUILD, META_LIMIT, STATUS_LABEL, mpLink } from '../lib/stability'
+import { StabilityView } from '../components/Stability'
+import type { Prediction } from '../lib/rulegen'
 import { Rich, LayerTag } from '../components/Rich'
 
 const pct = (x: number) => `${Math.round(x * 100)}%`
@@ -21,12 +24,25 @@ function findings(all: RuleResult[]) {
   const size = by(['r15']), sizeVal = by(['r15', 'val'])
   const geo = by(['geo']), group = by(['group']), groupGeo = by(['group', 'geo'])
   const val = by(['val']), valGiver = by(['val', 'giver'])
+  const judged = strongest.mpOk + strongest.mpBad
   return [
     {
+      title: 'השופט השני מאשר',
+      body: `הכלל החזק ביותר המציא ${strongest.outside} נוסחאות שאינן במדגם. ${judged} מהן כבר חושבו ב-Materials Project, ו-${strongest.mpOk} מהן יציבות או כמעט יציבות: ==${pct(strongest.mpOk / Math.max(1, judged))} אישור מחישוב בלתי תלוי.==`,
+      meaning: `כשסופרים גם את מה שהחישוב מאשר, הכלל צודק ב-${pct(strongest.reality)} במקום ${pct(strongest.precision)}. המדגם הקטן הסתיר את רוב ההצלחות.`,
+      ids: strongest.ids,
+    },
+    {
       title: 'החליפי את המתכת, שמרי את החבר',
-      body: `החלפה במקום של הנותן מצליחה ב-${pct(giver.precision)}. במקום של הלוקח: ${pct(taker.precision)}. ==הפרש של פי ${Math.round(giver.precision / taker.precision)}.==`,
-      meaning: 'בהמצאה מתחילים מהחומר, ומחליפים את המתכת. את החמצן, הגופרית או הכלור משאירים.',
+      body: `במדגם, החלפת הנותן מצליחה ב-${pct(giver.precision)} והחלפת הלוקח ב-${pct(taker.precision)}. עם השופט השני: ${pct(giver.reality)} מול ${pct(taker.reality)}.`,
+      meaning: `==הכלל נכון, אבל הפער קטן משנראה: פי ${(giver.reality / taker.reality).toFixed(1)} ולא פי ${Math.round(giver.precision / taker.precision)}.== מדגם קטן מגזים בפערים. לכן כל ממצא נבדק פעמיים.`,
       ids: ['giver'],
+    },
+    {
+      title: 'ידיים ועוד מתכת שוות לטור, ברוחב כפול',
+      body: `"אותה ערכיות" ועוד "רק המתכת" צודק ב-${pct(valGiver.reality)} מול המציאות המורחבת. "אותו טור": ${pct(group.reality)}. אבל הוא מתיר פי ${(valGiver.allowed / group.allowed).toFixed(1)} יותר החלפות.`,
+      meaning: '==אותו דיוק, יותר אפשרויות.== לממציאה זה הכלל הטוב ביותר להתחיל ממנו.',
+      ids: ['val', 'giver'],
     },
     {
       title: 'מספר הידיים חשוב יותר מהמקום',
@@ -76,7 +92,7 @@ export function Rules({ params }: { params: URLSearchParams }) {
   const picked = (params.get('r') ?? '').split('+').filter((id) => ATOM.has(id))
   const ids = picked.length ? picked : ['group', 'geo']
   const mine = useMemo(() => evaluate(ids), [ids.join('+')])
-  const preds = useMemo(() => predictions(ids, 8), [ids.join('+')])
+  const preds = useMemo(() => predictions(ids, 6), [ids.join('+')])
   const toggle = (id: string) => setParam('r', (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]).join('+') || null)
   const load = (r: string[]) => { setParam('r', r.join('+')); document.getElementById('builder')?.scrollIntoView({ behavior: 'smooth' }) }
 
@@ -147,15 +163,16 @@ export function Rules({ params }: { params: URLSearchParams }) {
             <div className="eyebrow">הכלל</div>
             <b className="rule-name">{ruleText(ids)}</b>
             <div className="meters">
-              <Meter label="דיוק" sub="מההחלפות שהכלל מתיר, כמה אמיתיות" v={mine.precision} />
-              <Meter label="כיסוי" sub="מכל ההחלפות האמיתיות, כמה הוא מוצא" v={mine.recall} />
+              <Meter label="דיוק במדגם" sub="מההחלפות שהכלל מתיר, כמה נמצאות במדגם" v={mine.precision} />
+              <Meter label="דיוק מול החישוב" sub="כולל מה ש-Materials Project מחשב כיציב" v={mine.reality} />
+              <Meter label="כיסוי" sub="מכל ההחלפות האמיתיות במדגם, כמה הוא מוצא" v={mine.recall} />
             </div>
             <p className="small" style={{ margin: 0 }}>
               פי <b>{mine.lift.toFixed(1)}</b> מניחוש עיוור. הכלל מתיר <b>{mine.allowed.toLocaleString('he-IL')}</b> החלפות, ו-<b>{mine.hits.toLocaleString('he-IL')}</b> מהן אמיתיות.
               {mine.allowed < 150 && <span className="sig-bad"> פחות מ-150 החלפות: זו אנקדוטה, לא כלל.</span>}
             </p>
             <div className="ex-grid small">
-              <span className="eyebrow">הכלל צדק</span><span className="eyebrow">הכלל טעה, לפי המאגר</span>
+              <span className="eyebrow">הכלל צדק</span><span className="eyebrow">הכלל טעה, לפי החישוב</span>
               <span className="sig-good" dir="ltr">{mine.examples.map((e) => `${prettyFormula(e.from)}→${prettyFormula(e.to)}`).join('   ') || '—'}</span>
               <span className="sig-bad" dir="ltr">{mine.misses.map((e) => `${prettyFormula(e.from)}→${prettyFormula(e.to)}`).join('   ') || '—'}</span>
             </div>
@@ -164,13 +181,35 @@ export function Rules({ params }: { params: URLSearchParams }) {
         <Predictions ids={ids} precision={mine.precision} preds={preds} />
       </section>
 
+      <section className="stack">
+        <h2 className="home-h2">השופט השני: כמה אפשר לסמוך עליו</h2>
+        <div className="glass panel stack">
+          <p className="small muted" style={{ margin: 0 }}>
+            <Rich text={`לפני שסומכים על שופט, בודקים אותו על מה שכבר ידוע. כך נראות ${CALIBRATION.total} התרכובות הידועות של המדגם בעיני החישוב:`} />
+          </p>
+          <div className="calib">
+            <div style={{ ['--jc' as string]: 'var(--st-ok)' }}><b>{CALIBRATION.stable}</b><span className="small">יציבות</span></div>
+            <div style={{ ['--jc' as string]: 'var(--st-ok)' }}><b>{CALIBRATION.meta}</b><span className="small">כמעט יציבות</span></div>
+            <div style={{ ['--jc' as string]: 'var(--st-bad)' }}><b>{CALIBRATION.unstable}</b><span className="small">"לא יציבות", אף שהן קיימות</span></div>
+            <div style={{ ['--jc' as string]: 'var(--st-open)' }}><b>{CALIBRATION.absent}</b><span className="small">לא חושבו</span></div>
+          </div>
+          <p className="small muted" style={{ margin: 0 }}>
+            <Rich text={`==השופט מסכים עם המציאות ב-${pct(CALIBRATION.agree)} מהמקרים שהוא מכיר.== הטעויות שלו הן חומרים אמיתיים שקיימים למרות שאינם במצב האנרגיה הנמוך ביותר, כמו ${CALIBRATION.unstableExamples.map(prettyFormula).join(', ')}. לכן "החישוב דוחה" הוא סימן אזהרה, לא פסק דין.`} />
+          </p>
+          <p className="small faint" style={{ margin: 0 }}>
+            המקור: Materials Project, אוסף thermo, גרסת {MP_BUILD}, {MP_COUNT.toLocaleString('he-IL')} תרכובות בינאריות. התקן: חישובי DFT (GGA/GGA+U/r2SCAN) ומרחק מקו היציבות (energy above hull). הסף של {Math.round(META_LIMIT * 1000)} meV לאטום נשען על Sun ואחרים, Science Advances, 2016.
+          </p>
+        </div>
+      </section>
+
       <section className="glass panel stack">
         <h3>על מה הבדיקה נשענת, ואיך היא מודדת את עצמה</h3>
         <p className="small muted" style={{ margin: 0 }}>
           <b>המדדים:</b> דיוק (precision), כיסוי (recall) ויחס לניחוש (lift), המדדים המקובלים לבדיקת מסווגים.
           <br /><b>הכללים המוכרים שנבדקו:</b> כלל ה-15% בגודל (Hume-Rothery, 1934) וכללי ההחלפה של Goldschmidt (1926), שנבנו במקור לסגסוגות ולמינרלים.
           <br /><b>אין דליפה:</b> הכללים משתמשים רק בתכונות מדודות, לא בהיסטוריה של התרכובות, ולכן אינם יכולים "לזכור" את התשובה.
-          <br /><b>המגבלה:</b> המאגר הוא מדגם. "טעה לפי המאגר" אומר "לא במדגם", וחלק מהטעויות הן תרכובות אמיתיות. לכן הדיוק הוא <b>גבול תחתון</b>.
+          <br /><b>שני שופטים:</b> הראשון הוא המדגם, {EXPERIMENT.compounds} תרכובות ידועות. השני הוא חישוב היציבות של Materials Project, שבודק גם נוסחאות שאינן במדגם.
+          <br /><b>המגבלה:</b> "לא חושב" אינו "לא קיים", ו"לא יציב" אינו "בלתי אפשרי". חומר יכול להתקיים במצב שאינו הנמוך ביותר באנרגיה.
         </p>
       </section>
     </>
@@ -223,35 +262,48 @@ function RuleMap({ all, front, current, onPick }: { all: RuleResult[]; front: Ru
 }
 
 function Predictions({ ids, precision, preds }: { ids: string[]; precision: number; preds: ReturnType<typeof predictions> }) {
-  const hyp = useHypotheses()
-  if (!preds.list.length) return null
+  if (!preds.total) return null
+  const cols: { key: 'ok' | 'bad' | 'open'; title: string; about: string; list: Prediction[]; n: number; color: string }[] = [
+    { key: 'ok', title: 'החישוב מאשר', about: 'חסרים במדגם, אבל יציבים או כמעט יציבים בחישוב. הכלל צדק.', list: preds.ok, n: preds.okN, color: 'var(--st-ok)' },
+    { key: 'open', title: 'פתוח באמת', about: 'אף אחד עוד לא חישב אותם. אלה ההשערות החדשות.', list: preds.open, n: preds.openN, color: 'var(--st-open)' },
+    { key: 'bad', title: 'החישוב דוחה', about: 'החישוב מראה שהם יתפרקו. כאן הכלל טעה.', list: preds.bad, n: preds.badN, color: 'var(--st-bad)' },
+  ]
   return (
     <div className="glass panel stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h3 style={{ margin: 0 }}>מה הכלל ממציא</h3>
+        <h3 style={{ margin: 0 }}>מה הכלל ממציא, ומה השופט השני אומר</h3>
         <LayerTag id="guess" />
       </div>
       <p className="small muted" style={{ margin: 0 }}>
-        הכלל מתיר <b>{preds.total.toLocaleString('he-IL')}</b> נוסחאות שלא נמצאות במאגר. הנה דגימה מתרכובות מוצא שונות.
-        <br /><Rich text={`==הערכה גסה: כ-${pct(precision)} מהן הן חומרים אמיתיים==, כי זה שיעור ההצלחה של הכלל על מה שכבר ידוע.`} />
+        הכלל מתיר <b>{preds.total.toLocaleString('he-IL')}</b> נוסחאות שלא נמצאות במדגם. כל אחת נבדקה מול חישובי היציבות של Materials Project.
       </p>
-      <div className="pred-grid">
-        {preds.list.map((p) => {
-          const saved = hyp.list.some((h) => h.formula === p.to)
-          return (
-            <div key={p.to} className="pred">
-              <span className="big-formula" dir="ltr">{prettyFormula(p.to)}</span>
-              <span className="small faint mono" dir="ltr">{prettyFormula(p.from)} · {p.x}→{p.y}</span>
-              <div className="row small">
-                <a className="chip" href={MP_URL(p.to)} target="_blank" rel="noreferrer">בדוק ב-Materials Project</a>
-                <a className="chip" href={href('lab', { f: p.from, el: p.x })}>מעבדה</a>
-                <button className="chip" disabled={saved} onClick={() => hyp.add({ formula: p.to, template: p.from, replaced: p.x, by: p.y, score: precision })}>{saved ? 'נשמר' : 'שמור'}</button>
-              </div>
-            </div>
-          )
-        })}
+      <div className="judges">
+        {cols.map((c) => (
+          <div key={c.key} className="judge-col" style={{ ['--jc' as string]: c.color }}>
+            <h4>{c.title} · <span className="mono">{c.n.toLocaleString('he-IL')}</span></h4>
+            <p className="small muted" style={{ margin: 0 }}>{c.about}</p>
+            {c.list.map((p) => <PredCard key={p.to} p={p} precision={precision} />)}
+          </div>
+        ))}
       </div>
       <p className="small faint" style={{ margin: 0 }}>הכלל: {ruleText(ids)}.</p>
+    </div>
+  )
+}
+
+function PredCard({ p, precision }: { p: Prediction; precision: number }) {
+  const hyp = useHypotheses()
+  const saved = hyp.list.some((h) => h.formula === p.to)
+  return (
+    <div className="pred">
+      <span className="big-formula" dir="ltr">{prettyFormula(p.to)}</span>
+      <span className="small faint mono" dir="ltr">{prettyFormula(p.from)} · {p.x}→{p.y}</span>
+      <StabilityView e={p.mp} s={p.st} label={STATUS_LABEL[p.st]} link={p.mp ? mpLink(p.mp.id) : null} full />
+      <div className="row small">
+        {!p.mp && <a className="chip" href={MP_URL(p.to)} target="_blank" rel="noreferrer">חפש ב-Materials Project</a>}
+        <a className="chip" href={href('lab', { f: p.from, el: p.x })}>מעבדה</a>
+        <button className="chip" disabled={saved} onClick={() => hyp.add({ formula: p.to, template: p.from, replaced: p.x, by: p.y, score: precision })}>{saved ? 'נשמר' : 'שמור'}</button>
+      </div>
     </div>
   )
 }
