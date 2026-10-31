@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { href, useRoute } from './lib/router'
 import { useToast } from './lib/store'
 import { Home } from './pages/Home'
@@ -10,6 +10,9 @@ import { Lab } from './pages/Lab'
 import { TablePage } from './pages/TablePage'
 import { Life } from './pages/Life'
 import { Rings } from './pages/Rings'
+// The insights engine backtests every rule on load, so both pages that use it load on demand.
+const Insights = lazy(() => import('./pages/Insights').then((m) => ({ default: m.Insights })))
+const Guide = lazy(() => import('./pages/Guide').then((m) => ({ default: m.Guide })))
 
 declare module 'react' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -17,6 +20,8 @@ declare module 'react' {
 }
 
 export const PAGES = [
+  { id: 'guide', label: 'מדריך' },
+  { id: 'insights', label: 'תובנות' },
   { id: 'matrix', label: 'מטריצה' },
   { id: 'network', label: 'רשת' },
   { id: 'secondary', label: 'מחזוריות משנית' },
@@ -42,11 +47,13 @@ export function App() {
       case 'life': return <Life params={p} />
       case 'lab': return <Lab params={p} />
       case 'table': return <TablePage />
+      case 'insights': return <Insights />
+      case 'guide': return <Guide />
       default: return <Home />
     }
   })()
   return (
-    <div className={`shell${route.page === 'home' || route.page === 'lab' || route.page === 'table' || route.page === 'life' ? '' : ' fit'}`}>
+    <div className={`shell${['home', 'lab', 'table', 'life', 'insights', 'guide'].includes(route.page) ? '' : ' fit'}`}>
       <div className="orbs" aria-hidden><span /><span /><span /></div>
       <header className="topbar">
         <a className="brand" href={href('home')} aria-label="טבלה מחזורית כרשת, דף הבית">
@@ -62,7 +69,7 @@ export function App() {
           <ai-menu project="TavlaMachzorit-GH"><span className="logo-btn">אד' ענת שטיבלמן A&amp;I</span></ai-menu>
         </div>
       </header>
-      <main id="main">{page}</main>
+      <main id="main"><Suspense fallback={<div className="boot">מחשב תובנות</div>}>{page}</Suspense></main>
       {t && <div className={`toast glass${t.err ? ' err' : ''}`} role="status">{t.text}</div>}
     </div>
   )
