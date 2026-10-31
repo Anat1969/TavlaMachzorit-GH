@@ -11,6 +11,7 @@ import { ELEMENTS, BY_SYM, type Element } from '../data/elements'
 import { COMPOUNDS, FORMULA_SET, formatFormula } from '../data/compounds'
 import { hops } from './mayan'
 import { lookup, status, type Status, type MPEntry } from './stability'
+import { OX } from '../data/oxidation'
 
 export interface Atom { id: string; label: string; family: string; test: (x: Element, y: Element, role: Role, partner: Element) => boolean }
 type Role = 'giver' | 'taker' // X is the less (giver) or more (taker) electronegative partner
@@ -36,15 +37,31 @@ export const ATOMS: Atom[] = [
   { id: 'ie1', family: 'אחיזה', label: 'אחיזה דומה באלקטרונים (עד 1 eV)', test: (x, y) => dIE(x, y) <= 1 },
   // the role holds for both: X gives in the original compound, and Y would give to the same partner
   { id: 'giver', family: 'תפקיד', label: 'רק במקום של הנותן (המתכת)', test: (_x, y, r, o) => r === 'giver' && (y.en ?? 0) < (o.en ?? 0) },
+  // computed per swap, from the parent compound's charges (see CHARGE below)
+  { id: 'charge', family: 'מטען', label: 'היסוד החדש נושא את אותו מטען', test: () => true },
   { id: 'taker', family: 'תפקיד', label: 'רק במקום של הלוקח', test: (_x, y, r, o) => r === 'taker' && (y.en ?? 9) > (o.en ?? 0) },
 ]
 export const ATOM = new Map(ATOMS.map((a) => [a.id, a]))
 
 // ---------- the experiment table: every possible swap, computed once ----------
 
-interface Swap { from: string; to: string; x: string; y: string; hit: boolean; mp: MPEntry | null; st: Status }
+interface Swap { from: string; to: string; x: string; y: string; hit: boolean; mp: MPEntry | null; st: Status; role: Role; charge: boolean; ox: number[] }
 // Helium, neon and argon have no stable compounds, so they are not candidates for any swap.
 const pool = ELEMENTS.filter((e) => e.known && !['He', 'Ne', 'Ar'].includes(e.sym))
+/**
+ * The charge X carries in its parent compound, read from its partner's common charges:
+ * in Al2O3, oxygen is -2, so each Al carries +3. Only charges X is known to take are kept.
+ * An empty list means the compound is not ionic enough for this reading (borides, carbides).
+ */
+function chargesOf(parts: [string, number][], i: number, role: Role): number[] {
+  const [xs, nx] = parts[i], [ps, np] = parts[1 - i]
+  const partner = (OX[ps]?.[0] ?? []).filter((v) => (role === 'giver' ? v < 0 : v > 0))
+  const known = OX[xs]?.[1] ?? []
+  return [...new Set(partner.map((v) => -(np * v) / nx))].filter((v) => Number.isInteger(v) && v !== 0 && known.includes(v))
+}
+// Y must know the charge as one of its common states; the full list of exotic states let NaCl→NaAl through
+const chargeOk = (ox: number[], y: string) => !ox.length || ox.some((v) => (OX[y]?.[0] ?? []).includes(v))
+
 const SWAPS: Swap[] = []
 const ROLE: Role[] = []
 const PARTNER: Element[] = []
@@ -57,12 +74,13 @@ for (const c of COMPOUNDS) {
     if (!x?.known) return
     const other = i === 0 ? e1 : e0
     const role: Role = (x.en ?? 0) <= (other.en ?? 0) ? 'giver' : 'taker'
+    const ox = chargesOf(c.parts, i, role)
     for (const y of pool) {
       if (y.sym === s0 || y.sym === s1) continue
       const parts = c.parts.map((p, j) => (j === i ? [y.sym, p[1]] : p)) as [string, number][]
       const to = formatFormula(parts)
       const mp = lookup(parts)
-      SWAPS.push({ from: c.formula, to, x: s, y: y.sym, hit: FORMULA_SET.has(to), mp, st: status(mp) })
+      SWAPS.push({ from: c.formula, to, x: s, y: y.sym, hit: FORMULA_SET.has(to), mp, st: status(mp), role, charge: chargeOk(ox, y.sym), ox })
       ROLE.push(role)
       PARTNER.push(other)
     }
@@ -76,6 +94,7 @@ export const EXPERIMENT = { swaps: N, hits: HITS, base: HITS / N, compounds: COM
 const COLS = new Map<string, Uint8Array>()
 for (const a of ATOMS) {
   const col = new Uint8Array(N)
+  if (a.id === 'charge') { for (let k = 0; k < N; k++) col[k] = SWAPS[k].charge ? 1 : 0; COLS.set(a.id, col); continue }
   for (let k = 0; k < N; k++) col[k] = a.test(BY_SYM.get(SWAPS[k].x)!, BY_SYM.get(SWAPS[k].y)!, ROLE[k], PARTNER[k]) ? 1 : 0
   COLS.set(a.id, col)
 }
@@ -186,3 +205,44 @@ export function predictions(ids: string[], n = 6) {
 }
 
 export type Prediction = Swap
+
+/** Every formula a rule allows that the sample lacks and no one has computed: the truly open questions. */
+export function openPredictions(ids: string[]): Swap[] {
+  const cols = ids.map((id) => COLS.get(id)!).filter(Boolean)
+  const out: Swap[] = []
+  for (let k = 0; k < N; k++) {
+    const s = SWAPS[k]
+    if (s.hit || s.st !== 'absent') continue
+    let ok = true
+    for (const c of cols) if (!c[k]) { ok = false; break }
+    if (ok) out.push(s)
+  }
+  return out
+}
+
+/** The track record of one specific substitution X→Y across every parent compound that has a verdict. */
+const PAIRS = (() => {
+  const m = new Map<string, { ok: number; judged: number }>()
+  for (const s of SWAPS) {
+    const ok = s.hit || s.st === 'stable' || s.st === 'meta'
+    if (!ok && s.st !== 'unstable') continue
+    const k = `${s.x}>${s.y}|${s.role}`
+    const r = m.get(k) ?? { ok: 0, judged: 0 }
+    r.judged++
+    if (ok) r.ok++
+    m.set(k, r)
+  }
+  return m
+})()
+export const pairRecord = (x: string, y: string, role: Role) => PAIRS.get(`${x}>${y}|${role}`) ?? { ok: 0, judged: 0 }
+export type { Role }
+
+/** Counts of distinct formulas, for the funnel on the work-list page. */
+export function swapStats() {
+  const all = new Set<string>(), outside = new Set<string>(), absent = new Set<string>()
+  for (const s of SWAPS) {
+    all.add(s.to)
+    if (!s.hit) { outside.add(s.to); if (s.st === 'absent') absent.add(s.to) }
+  }
+  return { swaps: all.size, outside: outside.size, outsideAbsent: absent.size }
+}

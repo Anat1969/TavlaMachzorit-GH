@@ -14,6 +14,7 @@ import { Rings } from './pages/Rings'
 const Insights = lazy(() => import('./pages/Insights').then((m) => ({ default: m.Insights })))
 const Guide = lazy(() => import('./pages/Guide').then((m) => ({ default: m.Guide })))
 const Rules = lazy(() => import('./pages/Rules').then((m) => ({ default: m.Rules })))
+const Open = lazy(() => import('./pages/Open').then((m) => ({ default: m.Open })))
 const School = lazy(() => import('./pages/School').then((m) => ({ default: m.School })))
 
 declare module 'react' {
@@ -26,6 +27,7 @@ export const PAGES = [
   { id: 'school', label: 'יסודות המקצוע' },
   { id: 'insights', label: 'תובנות' },
   { id: 'rules', label: 'מחולל כללים' },
+  { id: 'open', label: 'השערות פתוחות' },
   { id: 'matrix', label: 'מטריצה' },
   { id: 'network', label: 'רשת' },
   { id: 'secondary', label: 'מחזוריות משנית' },
@@ -55,11 +57,12 @@ export function App() {
       case 'guide': return <Guide />
       case 'rules': return <Rules params={p} />
       case 'school': return <School />
+      case 'open': return <Open params={p} />
       default: return <Home />
     }
   })()
   return (
-    <div className={`shell${['home', 'lab', 'table', 'life', 'insights', 'guide', 'rules', 'school'].includes(route.page) ? '' : ' fit'}`}>
+    <div className={`shell${['home', 'lab', 'table', 'life', 'insights', 'guide', 'rules', 'school', 'open'].includes(route.page) ? '' : ' fit'}`}>
       <div className="orbs" aria-hidden><span /><span /><span /></div>
       <header className="topbar">
         <a className="brand" href={href('home')} aria-label="טבלה מחזורית כרשת, דף הבית">
