@@ -9,7 +9,7 @@ export type Status = 'stable' | 'meta' | 'unstable' | 'absent'
 export interface MPEntry { formula: string; id: string; ehull: number; eform: number | null; spacegroup: string; decomposes: string[] }
 
 export const META_LIMIT = 0.07 // eV per atom
-export const MP_BUILD = '2026-09-28'
+export const MP_BUILD = '2026-09-28' // rebuild: scripts/fetch-mp-binary.py
 const DATA = MP as unknown as Record<string, [string, string, number, number | null, string, string[]]>
 export const MP_COUNT = Object.keys(DATA).length
 
