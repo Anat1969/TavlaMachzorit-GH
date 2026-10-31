@@ -633,3 +633,29 @@ mark.hl { background: linear-gradient(transparent 38%, var(--mark-insight) 38%);
 .calib div { padding: 10px; background: rgba(0,0,0,0.15); border-top: 3px solid var(--jc); }
 .calib b { font-size: 26px; font-weight: 400; display: block; }
 @media (max-width: 768px) { .judges, .calib { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- open hypotheses ---------- */
+.funnel { display: flex; flex-direction: column; gap: 8px; }
+.funnel-row { display: grid; grid-template-columns: 240px minmax(0, 1fr) 90px; gap: 12px; align-items: center; animation: rise 0.5s both; }
+.funnel-track { height: 18px; background: var(--deep); box-shadow: var(--press); position: relative; }
+.funnel-track span { position: absolute; inset-block: 0; inset-inline-start: 0; background: linear-gradient(90deg, var(--warn), var(--k-guess)); animation: grow 1s cubic-bezier(.2,.8,.3,1) both; }
+.funnel-n { text-align: end; font-size: 18px; font-weight: 400; }
+.work-table { display: flex; flex-direction: column; }
+.work-row { display: grid; grid-template-columns: 32px minmax(150px, 1fr) minmax(170px, 1fr) minmax(200px, 1.4fr) auto; gap: 16px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--rim); animation: rise 0.4s both; }
+.work-rank { font-size: 22px; color: var(--text-muted); }
+.work-actions { max-width: 230px; }
+.letter-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); }
+.letter { margin: 0; white-space: pre-wrap; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; text-align: left; max-height: 520px; overflow: auto; }
+.letter-list { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 4px; }
+@media (max-width: 1024px) {
+  .work-row { grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1fr); }
+  .work-row > :nth-child(4), .work-actions { grid-column: 2 / -1; max-width: none; }
+  .letter-split { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .funnel-row { grid-template-columns: minmax(0, 1fr) 80px; }
+  .funnel-track { grid-column: 1 / -1; grid-row: 2; }
+  .work-row { grid-template-columns: 28px minmax(0, 1fr); }
+  .work-row > :nth-child(3) { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) { .funnel-row, .work-row, .funnel-track span { animation: none; } }

@@ -65,3 +65,19 @@ function calibrate() {
   c.agree = (c.stable + c.meta) / Math.max(1, c.total - c.absent)
   return c
 }
+
+/** Every element pair Materials Project has computed, with its compounds: was the neighbourhood explored? */
+const SYSTEMS = (() => {
+  const m = new Map<string, { formula: string; ehull: number }[]>()
+  for (const [key, r] of Object.entries(DATA)) {
+    const els = key.match(/[A-Z][a-z]?/g)!
+    const k = els.sort().join('-')
+    if (!m.has(k)) m.set(k, [])
+    m.get(k)!.push({ formula: r[0], ehull: r[2] })
+  }
+  return m
+})()
+/** Stable compounds Materials Project knows in the same two-element system, most stable first. */
+export function system(a: string, b: string) {
+  return (SYSTEMS.get([a, b].sort().join('-')) ?? []).filter((x) => x.ehull <= META_LIMIT).sort((x, y) => x.ehull - y.ehull)
+}

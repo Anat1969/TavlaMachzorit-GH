@@ -25,7 +25,14 @@ function findings(all: RuleResult[]) {
   const geo = by(['geo']), group = by(['group']), groupGeo = by(['group', 'geo'])
   const val = by(['val']), valGiver = by(['val', 'giver'])
   const judged = strongest.mpOk + strongest.mpBad
+  const charge = by(['charge'])
   return [
+    {
+      title: 'איזון מטענים: הכלל הרחב והחזק',
+      body: `"היסוד החדש נושא את אותו מטען" צודק ב-${pct(charge.precision)}, פי ${charge.lift.toFixed(1)} מניחוש, ומוצא ${pct(charge.recall)} מכל ההחלפות האמיתיות.`,
+      meaning: '==זה המסנן הראשון לכל המצאה.== אלומיניום תמיד נותן 3. אם הנוסחה דורשת ממנו 2, היא כנראה לא תתקיים.',
+      ids: ['charge'],
+    },
     {
       title: 'השופט השני מאשר',
       body: `הכלל החזק ביותר המציא ${strongest.outside} נוסחאות שאינן במדגם. ${judged} מהן כבר חושבו ב-Materials Project, ו-${strongest.mpOk} מהן יציבות או כמעט יציבות: ==${pct(strongest.mpOk / Math.max(1, judged))} אישור מחישוב בלתי תלוי.==`,
