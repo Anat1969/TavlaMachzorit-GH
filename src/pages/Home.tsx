@@ -29,7 +29,8 @@ export function Home() {
           </p>
           <div className="row" style={{ marginTop: 16 }}>
             <a className="btn primary" href={href('network')}>פתחו את הרשת</a>
-            <a className="btn" href={href('lab')}>נסו להמציא חומר</a>
+            <a className="btn" href={href('insights')}>תובנות והמצאות</a>
+            <a className="btn" href={href('guide')}>מדריך בלי כימיה</a>
           </div>
         </div>
         <div className="hero-art" aria-hidden><HeroNet /></div>
