@@ -8,6 +8,7 @@ import { useHypotheses, toast } from '../lib/store'
 import { COMPOUND_LIFE } from '../data/everyday'
 import { RealWorld } from '../components/ElementPanel'
 import type { Candidate } from '../lib/substitute'
+import { StabilityBadge } from '../components/Stability'
 
 const STARTERS = ['GaAs', 'MoS2', 'NaCl', 'TiO2', 'MgB2', 'CdTe', 'LaB6', 'SiC', 'Bi2Te3', 'Li3N']
 
@@ -99,7 +100,7 @@ export function Lab({ params }: { params: URLSearchParams }) {
                     <div style={{ minWidth: 0 }}>
                       <div className="row">
                         <span className="formula" dir="ltr">{prettyFormula(c.formula)}</span>
-                        {c.known ? <span className="tag known">ידוע במאגר</span> : <span className="tag new">השערה</span>}
+                        {c.known ? <span className="tag known">ידוע במאגר</span> : <><span className="tag new">השערה</span><StabilityBadge parts={parseFormula(c.formula)} /></>}
                       </div>
                       <div className="layers" aria-hidden><i style={{ width: `${c.history * 100}%` }} /><b style={{ width: `${c.property * 100}%` }} /></div>
                       <div className="small faint mono">היסטוריה {c.history.toFixed(2)} · תכונות {c.property.toFixed(2)}{c.evidence.length > 0 && <> · <span dir="ltr">{c.evidence.map(prettyFormula).join('  ')}</span></>}</div>
@@ -191,7 +192,7 @@ function InventionPath({ template, orig, cand }: { template: string; orig: strin
         <div className="station" style={{ animationDelay: '1700ms' }}>
           <span className="eyebrow">3 · ההחלפה</span>
           <b className="big" dir="ltr">{prettyFormula(cand.formula)}</b>
-          <p className="small">{cand.known ? <span className="tag known">כבר ידוע במאגר</span> : <span className="tag new">השערה לחומר חדש</span>}</p>
+          <p className="small">{cand.known ? <span className="tag known">כבר ידוע במאגר</span> : <><span className="tag new">השערה לחומר חדש</span> <StabilityBadge parts={parseFormula(cand.formula)} full /></>}</p>
           <RealWorld sym={cand.sym} height={150} />
         </div>
       </div>

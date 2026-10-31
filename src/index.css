@@ -616,3 +616,20 @@ mark.hl { background: linear-gradient(transparent 38%, var(--mark-insight) 38%);
 @media (min-width: 901px) {
   .gifts, .path { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* ---------- the second judge: computed stability ---------- */
+:root { --st-ok: var(--sig-good); --st-bad: var(--sig-bad); --st-open: var(--k-guess); }
+.st { font-family: var(--font); display: inline-flex; flex-wrap: wrap; gap: 0 4px; align-items: baseline; padding: 1px 6px; border: 1px solid currentColor; }
+.st a { color: inherit; text-decoration: none; }
+.st a:hover { text-decoration: underline; }
+.st-stable, .st-meta { color: var(--st-ok); }
+.st-unstable { color: var(--st-bad); }
+.st-absent { color: var(--st-open); }
+.st-wait { color: var(--ink-faint); border-style: dashed; }
+.judges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.judge-col { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-top: 3px solid var(--jc); background: rgba(0,0,0,0.12); }
+.judge-col h4 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 17px; color: var(--jc); }
+.calib { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.calib div { padding: 10px; background: rgba(0,0,0,0.15); border-top: 3px solid var(--jc); }
+.calib b { font-size: 26px; font-weight: 400; display: block; }
+@media (max-width: 768px) { .judges, .calib { grid-template-columns: 1fr 1fr; } }
