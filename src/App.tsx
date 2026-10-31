@@ -13,6 +13,8 @@ import { Rings } from './pages/Rings'
 // The insights engine backtests every rule on load, so both pages that use it load on demand.
 const Insights = lazy(() => import('./pages/Insights').then((m) => ({ default: m.Insights })))
 const Guide = lazy(() => import('./pages/Guide').then((m) => ({ default: m.Guide })))
+const Rules = lazy(() => import('./pages/Rules').then((m) => ({ default: m.Rules })))
+const School = lazy(() => import('./pages/School').then((m) => ({ default: m.School })))
 
 declare module 'react' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -21,7 +23,9 @@ declare module 'react' {
 
 export const PAGES = [
   { id: 'guide', label: 'מדריך' },
+  { id: 'school', label: 'יסודות המקצוע' },
   { id: 'insights', label: 'תובנות' },
+  { id: 'rules', label: 'מחולל כללים' },
   { id: 'matrix', label: 'מטריצה' },
   { id: 'network', label: 'רשת' },
   { id: 'secondary', label: 'מחזוריות משנית' },
@@ -49,11 +53,13 @@ export function App() {
       case 'table': return <TablePage />
       case 'insights': return <Insights />
       case 'guide': return <Guide />
+      case 'rules': return <Rules params={p} />
+      case 'school': return <School />
       default: return <Home />
     }
   })()
   return (
-    <div className={`shell${['home', 'lab', 'table', 'life', 'insights', 'guide'].includes(route.page) ? '' : ' fit'}`}>
+    <div className={`shell${['home', 'lab', 'table', 'life', 'insights', 'guide', 'rules', 'school'].includes(route.page) ? '' : ' fit'}`}>
       <div className="orbs" aria-hidden><span /><span /><span /></div>
       <header className="topbar">
         <a className="brand" href={href('home')} aria-label="טבלה מחזורית כרשת, דף הבית">
