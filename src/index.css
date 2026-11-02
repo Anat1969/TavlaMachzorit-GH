@@ -659,3 +659,28 @@ mark.hl { background: linear-gradient(transparent 38%, var(--mark-insight) 38%);
   .work-row > :nth-child(3) { grid-column: 2; }
 }
 @media (prefers-reduced-motion: reduce) { .funnel-row, .work-row, .funnel-track span { animation: none; } }
+
+/* ---------- from nature to material ---------- */
+.challenge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.challenge { display: flex; flex-direction: column; gap: 6px; padding: 16px; text-align: start; font: inherit; color: inherit; cursor: pointer; border-radius: 0; transition: transform 0.2s, border-color 0.2s; animation: rise 0.5s both; }
+.challenge:hover { transform: translateY(-3px); border-color: var(--mist); }
+.challenge:active { transform: translateY(0); box-shadow: var(--press); }
+.challenge h3 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 21px; }
+.formula-inline { font-family: var(--serif); font-size: 1.15em; }
+.story { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr); gap: 8px; align-items: stretch; }
+.station-s { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: rgba(0,0,0,0.15); border-top: 3px solid var(--mist); align-items: flex-start; }
+.station-s b { font-family: var(--serif); font-weight: 400; font-size: 18px; }
+.story .arrow { align-self: center; height: 2px; background: var(--muted-stone); position: relative; }
+.story .arrow::after { content: ''; position: absolute; inset-inline-end: -2px; top: -5px; border: 6px solid transparent; border-inline-end-color: var(--muted-stone); transform: scaleX(-1); }
+.gate-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.gate { display: flex; flex-direction: column; gap: 2px; }
+.gate b { font-size: 24px; font-weight: 400; }
+.gate i { display: block; height: 8px; width: var(--w); background: var(--warn); animation: grow 0.9s both; }
+.gates-list { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 6px; }
+@media (max-width: 900px) {
+  .story { grid-template-columns: 1fr; }
+  .story .arrow { width: 2px; height: 20px; justify-self: center; }
+  .story .arrow::after { display: none; }
+  .gate-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { .challenge, .gate i { animation: none; } }

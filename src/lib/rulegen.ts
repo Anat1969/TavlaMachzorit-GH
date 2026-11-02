@@ -246,3 +246,15 @@ export function swapStats() {
   }
   return { swaps: all.size, outside: outside.size, outsideAbsent: absent.size }
 }
+
+/** All swaps that start from one parent compound, with the rules (by index set) that allow each. */
+export function swapsFrom(parent: string) {
+  const out: { s: Swap; k: number }[] = []
+  for (let k = 0; k < N; k++) if (SWAPS[k].from === parent) out.push({ s: SWAPS[k], k })
+  return out
+}
+export function allows(ids: string[], k: number) {
+  for (const id of ids) if (!COLS.get(id)?.[k]) return false
+  return true
+}
+export const BASE_REALITY = (() => evaluate([]).reality)()
