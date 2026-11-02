@@ -28,7 +28,8 @@ export function Home() {
             המטרה כאן היא לא רק ידע, אלא היגיון: להבין <b>למה</b> שני יסודות יכולים להחליף זה את זה. מתוך ההבנה הזו אפשר להציע חומרים שעוד לא נוצרו.
           </p>
           <div className="row" style={{ marginTop: 16 }}>
-            <a className="btn primary" href={href('network')}>פתחו את הרשת</a>
+            <a className="btn primary" href={href('nature')}>מהטבע לחומר: בחרי אתגר</a>
+            <a className="btn" href={href('network')}>פתחו את הרשת</a>
             <a className="btn" href={href('insights')}>תובנות והמצאות</a>
             <a className="btn" href={href('guide')}>מדריך בלי כימיה</a>
           </div>

@@ -81,3 +81,15 @@ const SYSTEMS = (() => {
 export function system(a: string, b: string) {
   return (SYSTEMS.get([a, b].sort().join('-')) ?? []).filter((x) => x.ehull <= META_LIMIT).sort((x, y) => x.ehull - y.ehull)
 }
+
+// ---------- properties for the function checks ----------
+import PROPS from '../data/mp-props.json'
+export interface Props { ehull: number; gap: number | null; density: number | null; pointGroup: string | null; shear: number | null; piezo: number | null; experimental: boolean }
+const P = PROPS as unknown as Record<string, [number, number | null, number | null, string | null, number | null, number | null, 0 | 1]>
+export function propsOf(parts: [string, number][]): Props | null {
+  const r = P[compKey(parts)]
+  return r ? { ehull: r[0], gap: r[1], density: r[2], pointGroup: r[3], shear: r[4], piezo: r[5], experimental: r[6] === 1 } : null
+}
+/** Crystal classes with a centre of inversion cannot be piezoelectric; neither can class 432. */
+const NO_PIEZO = new Set(['-1', '2/m', 'mmm', '4/m', '4/mmm', '-3', '-3m', '6/m', '6/mmm', 'm-3', 'm-3m', '432'])
+export const canBePiezo = (pg: string | null) => !!pg && !NO_PIEZO.has(pg)
