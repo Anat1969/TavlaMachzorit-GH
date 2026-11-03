@@ -1,0 +1,77 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>שכבה חלשה, מסננת חזקה</title><meta name="description" content="השכונה שבה יסוד גר בטבע כמעט לא מנבאת דבר. אבל כשמניחים אותה מעל הטבלה, היא הופכת כלל טוב לכלל מצוין. ממצא שכל אדריכלית מכירה ממפות שכבות.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;500&family=Heebo:wght@100;300;500&display=swap" rel="stylesheet">
+<style>
+@page { size: 210mm 297mm; margin: 0 }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0; background: #888 }
+body { font-family: 'Heebo', Arial, sans-serif; font-weight: 300; -webkit-print-color-adjust: exact; print-color-adjust: exact }
+.page { width: 210mm; height: 297mm; position: relative; overflow: hidden; margin: 0 auto 8mm; page-break-after: always; break-after: page; padding: 12mm; display: flex; flex-direction: column; gap: 5mm }
+.page:last-child { page-break-after: auto; break-after: auto }
+@media print { html, body { background: none } .page { margin: 0 } }
+@media screen and (max-width: 820px) { .page { zoom: 0.45 } }
+.run { position: absolute; bottom: 7mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-family: 'Heebo'; font-weight: 300; font-size: 6.5pt; letter-spacing: .25em; text-transform: uppercase }
+.cover-img { margin: -12mm -12mm 0; width: 210mm; height: 183.6mm; position: relative; flex: 0 0 auto }
+.cover-img img, .sq img { width: 100%; height: 100%; object-fit: cover; display: block }
+.tag { position: absolute; bottom: 5mm; right: 6mm; color: #fff; font-size: 7pt; letter-spacing: .12em; text-shadow: 0 1px 3px rgba(0,0,0,.65) }
+.kicker { font-size: 7pt; letter-spacing: .3em; margin-top: 3mm }
+h1 { font-family: 'Frank Ruhl Libre', serif; margin: 0; line-height: 1.02; font-size: 40pt }
+h1 .thin { font-weight: 300; display: block } h1 .bold { font-weight: 500; display: block }
+.dek { width: 129.8mm; font-size: 12pt; line-height: 1.55; margin: 0 }
+.byline { font-size: 8pt; letter-spacing: .15em; margin-top: auto; margin-bottom: 8mm }
+.ch { display: grid; grid-template-columns: 22mm 1fr; gap: 0 5mm }
+.num { font-family: 'Heebo'; font-weight: 100; font-size: 38pt; line-height: .9 }
+.ch h2 { font-family: 'Frank Ruhl Libre', serif; font-weight: 500; font-size: 20pt; margin: 0 0 3mm }
+.ch p { margin: 0 0 2.5mm; font-size: 10.5pt; line-height: 1.65 }
+.insight { font-family: 'Frank Ruhl Libre', serif; font-weight: 500; font-size: 14pt; padding-top: 2mm; margin-top: 2mm; border-top: .3mm solid }
+.quote { font-family: 'Frank Ruhl Libre', serif; font-size: 19pt; line-height: 1.35; padding: 4mm 0; border-top: .3mm solid; border-bottom: .3mm solid }
+.quote cite { display: block; font-family: 'Heebo'; font-style: normal; font-size: 7.5pt; letter-spacing: .08em; margin-top: 2mm }
+.row2 { display: grid; grid-template-columns: 1fr 129.8mm; gap: 6mm; margin-left: -12mm; align-items: start }
+.sq { width: 129.8mm; height: 129.8mm; position: relative }
+.nums { display: flex; flex-direction: column; gap: 3mm }
+.nums div { border-top: .3mm solid; padding-top: 1.5mm }
+.nums span { display: block; font-size: 7pt; letter-spacing: .15em }
+.nums b { font-family: 'Frank Ruhl Libre', serif; font-weight: 500; font-size: 15pt }
+.label { font-size: 7pt; letter-spacing: .3em; margin-bottom: 1.5mm }
+.not { font-size: 10.5pt; line-height: 1.6; border-top: .3mm solid; padding-top: 2mm }
+ol.steps { margin: 0; padding: 0 6mm 0 0; font-size: 12pt; line-height: 1.65 }
+ol.steps li { margin-bottom: 1.5mm }
+.question { font-family: 'Frank Ruhl Libre', serif; font-weight: 500; font-size: 22pt; line-height: 1.3; padding: 4mm 0 }
+.haiku { font-family: 'Frank Ruhl Libre', serif; font-weight: 300; font-size: 19pt; line-height: 1.6 }
+.strip { display: flex; gap: 2mm; height: 48mm; margin-top: auto; margin-bottom: 14mm }
+.strip img { height: 100%; aspect-ratio: 1; object-fit: cover }
+.sources { font-size: 7.5pt; line-height: 1.7 }
+.colophon { font-size: 6.5pt; line-height: 1.5 }
+.p2fig { display: grid; grid-template-columns: 1fr 86mm; gap: 6mm; margin-left: -12mm; margin-top: auto; margin-bottom: 10mm; align-items: end }
+.p2fig .sq { width: 86mm; height: 86mm }
+.p2fig p { font-size: 8pt; line-height: 1.6; margin: 0 }
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm }
+</style></head><body>
+<section class="page" style="background:#ffffff;color:#111111;--soft:#707070">
+<div class="cover-img"><img src="img/render-column.jpg" alt="הדמיה: טור אחד בטבלה, ארבעה יסודות שגדלים מלמעלה למטה"><span class="tag">הדמיה · הדמיה: טור אחד בטבלה, ארבעה יסודות שגדלים מלמעלה למטה</span></div>
+<div class="kicker" style="color:#707070">טבלה מחזורית כרשת · תגלית 3</div>
+<h1><span class="thin">שכבה חלשה,</span><span class="bold">מסננת חזקה</span></h1>
+<p class="dek">השכונה שבה יסוד גר בטבע כמעט לא מנבאת דבר. אבל כשמניחים אותה מעל הטבלה, היא הופכת כלל טוב לכלל מצוין. ממצא שכל אדריכלית מכירה ממפות שכבות.</p>
+<div class="byline" style="color:#707070">אד' ענת דוד שטיבלמן · עם המכונה של טבלה מחזורית כרשת</div>
+<div class="run" style="color:#707070"><span>טבלה מחזורית כרשת · שכבה חלשה, מסננת חזקה</span><span>1</span></div></section><section class="page" style="background:#f3f3f3;color:#111111;--soft:#707070">
+<div class="ch"><div class="num">01</div><div><h2>שכבה שכמעט לא אומרת כלום</h2><p>Victor Goldschmidt חילק את היסודות לפי המקום שבו הם מתרכזים בכדור הארץ: בסלע, בליבת הברזל, בגופרות או באוויר.</p><p>כשהמכונה בדקה את השכבה הזו לבדה, היא צדקה ב-12% בלבד. פי 1.3 מניחוש. כמעט חסרת ערך.</p><div class="insight" style="border-color:#cfcfcf">שכבה לבדה יכולה להיות כמעט שקופה.</div></div></div><div class="ch"><div class="num">02</div><div><h2>ההצטלבות</h2><p>"אותו טור" לבדו צודק ב-49%.</p><p>כשמוסיפים מעליו "אותה שכונה בטבע", הדיוק קופץ ל-67%, ומול השופט השני ל-82%.</p><p>השכבה החלשה לא מוסיפה ידע משלה. היא מסננת החוצה את המקרים שבהם הטור מטעה.</p><div class="insight" style="border-color:#cfcfcf">אף שכבה לא מחליטה לבד. ההצטלבות מחליטה.</div></div></div>
+<blockquote class="quote" style="border-color:#cfcfcf;margin:0">תכונה חלשה לבדה יכולה להיות מסננת חזקה.<cite style="color:#707070">מתוך ממצאי מחולל הכללים, טבלה מחזורית כרשת</cite></blockquote>
+<div class="p2fig"><p style="color:#707070">הדמיה מספר החוקים של טבלה מחזורית כרשת.</p><div class="sq"><img src="img/render-bonds.jpg" alt=""><span class="tag">הדמיה</span></div></div>
+<div class="run" style="color:#707070"><span>טבלה מחזורית כרשת · שכבה חלשה, מסננת חזקה</span><span>2</span></div></section><section class="page" style="background:#3e3e3e;color:#f2f2f2;--soft:#a3a3a3">
+<div class="ch"><div class="num">03</div><div><h2>הטבלה בלי הטבלה</h2><p>המכונה ניסתה גם כללים שלא משתמשים במיקום בטבלה בכלל.</p><p>מטען, משיכת אלקטרונים ומספר הקפיצות בטבעות, יחד, הגיעו ל-63% דיוק: קרוב לכלל החזק ביותר.</p><p>כלומר הטבלה היא סיכום של התכונות, ולא להפך.</p><div class="insight" style="border-color:#5a5a5a">התכונות מכילות את הטבלה.</div></div></div>
+<div class="row2"><div class="sq"><img src="img/render-giver.jpg" alt=""><span class="tag">הדמיה</span></div>
+<div class="nums"><div style="border-color:#5a5a5a"><span style="color:#a3a3a3">שכונה בטבע לבדה</span><b><bdi>12%</bdi></b></div><div style="border-color:#5a5a5a"><span style="color:#a3a3a3">אותו טור</span><b><bdi>49%</bdi></b></div><div style="border-color:#5a5a5a"><span style="color:#a3a3a3">שתיהן יחד</span><b><bdi>67%</bdi></b></div><div style="border-color:#5a5a5a"><span style="color:#a3a3a3">מול השופט השני</span><b><bdi>82%</bdi></b></div><div style="border-color:#5a5a5a"><span style="color:#a3a3a3">בלי הטבלה</span><b><bdi>63%</bdi></b></div></div></div>
+<div class="not" style="border-color:#5a5a5a"><div class="label" style="color:#a3a3a3">מה זה לא</div>השכבה לא "גורמת" להחלפה להצליח. היא מתואמת עם תכונות שכן קובעות, כמו גודל ומטען. זה ממצא על מיון, לא על סיבה.</div>
+<div class="run" style="color:#a3a3a3"><span>טבלה מחזורית כרשת · שכבה חלשה, מסננת חזקה</span><span>3</span></div></section><section class="page" style="background:#131313;color:#f2f2f2;--soft:#a3a3a3">
+<div class="label" style="color:#a3a3a3">מה זה אומר לתכנון</div>
+<ol class="steps"><li>לא לפסול שכבת מידע שנראית חלשה לבדה. לבדוק אותה כמסננת מעל שכבה אחרת.</li><li>למדוד כל הצטלבות של שכבות, כמו כל כלל.</li><li>לחפש את המקרים שבהם השכבה החזקה מטעה. שם השכבה החלשה עובדת.</li></ol>
+<div class="question">איזו שכבה במפה שלך נראית חסרת ערך, ואולי היא המסננת החסרה?</div>
+<div class="cols2"><div><div class="label" style="color:#a3a3a3">הייקו</div><div class="haiku">שכבה שקופה<br>מונחת על מפה ישנה<br>הקו מתחדד</div></div>
+<div><div class="label" style="color:#a3a3a3">מקורות</div><div class="sources" style="color:#a3a3a3">V. M. Goldschmidt, סיווג גיאוכימי של היסודות, 1937<br>Materials Project, נתונים פתוחים (AWS Open Data), גרסה 2026-09-28<br>מנוע: src/lib/rulegen.ts</div></div></div>
+<div class="strip"><img src="img/render-column.jpg" alt=""><img src="img/render-bonds.jpg" alt=""><img src="img/render-giver.jpg" alt=""></div>
+<div class="colophon" style="color:#a3a3a3">התמונות שמסומנות "הדמיה" הן איורים תלת־ממדיים מספר החוקים של טבלה מחזורית כרשת. כל מספר בכתבה חושב במנועי האפליקציה, ונבדק מול מאגר התרכובות ומול חישובי Materials Project.<br>
+הגוונים יורדים מבהיר לכהה בקפיצה אחת באמצע, כמו המעבר מטבע לחומר. רוחב התמונה הוא חתך הזהב של רוחב הדף.<br>
+https://tavla-machzorit.vercel.app/#/rules?r=group+geo</div>
+<div class="run" style="color:#a3a3a3"><span>טבלה מחזורית כרשת · שכבה חלשה, מסננת חזקה</span><span>4</span></div></section>
+</body></html>

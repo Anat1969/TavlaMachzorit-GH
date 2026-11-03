@@ -703,3 +703,17 @@ mark.hl { background: linear-gradient(transparent 38%, var(--mark-insight) 38%);
   .book3d { height: 380px; }
 }
 @media (prefers-reduced-motion: reduce) { .lesson, .pt-step { animation: none; } }
+
+/* ---------- magazine ---------- */
+.mag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.mag-card { display: flex; flex-direction: column; overflow: hidden; animation: rise 0.5s both; transition: transform 0.2s, border-color 0.2s; }
+.mag-card:hover { transform: translateY(-3px); border-color: var(--mist); }
+.mag-cover { position: relative; display: block; aspect-ratio: 1.15; overflow: hidden; }
+.mag-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s; }
+.mag-card:hover .mag-cover img { transform: scale(1.04); }
+.mag-tag { position: absolute; bottom: 8px; inset-inline-end: 10px; color: #fff; font-size: 11px; text-shadow: 0 1px 3px rgba(0,0,0,0.7); }
+.mag-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.mag-body h3 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 22px; line-height: 1.2; }
+.mag-body h3 .thin { font-weight: 300; }
+.mag-body p { margin: 0; flex: 1; }
+@media (prefers-reduced-motion: reduce) { .mag-card { animation: none; } }
