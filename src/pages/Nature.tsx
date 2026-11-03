@@ -52,7 +52,7 @@ export function Nature({ params }: { params: URLSearchParams }) {
           <li><b>מטען:</b> היסוד החדש יכול לשאת את אותו מטען. הכלל הזה לבדו צודק פי 3 מניחוש.</li>
           <li><b>קיום:</b> החומר נמצא במדגם, או יציב בחישובי Materials Project, או שאף אחד עוד לא בדק אותו. מה שהחישוב דוחה, יוצא.</li>
           <li><b>תפקוד:</b> לחומר יש התכונה שהאתגר צריך, כמו פער אנרגיה לאור, סימטריה ללחץ או צפיפות לקלילות. המדידה נעשית באותו מכשיר כמו לחומר המוצא, כי פערי אנרגיה מחושבים נמוכים מהאמת, וההשוואה מבטלת את ההטיה.</li>
-          <li><b>בטיחות:</b> בלי עופרת, כספית, קדמיום, ארסן, תליום, בריליום או יסוד רדיואקטיבי.</li>
+          <li><b>בטיחות:</b> בלי עופרת, כספית, קדמיום, ארסן, תליום, בריליום או יסוד רדיואקטיבי. ובלי חומר שמגיב עם מים ומשחרר גז רעיל או דליק (כמו AlP, שמשחרר פוספין). בלכידת פחמן ובייבוש, תגובה מתונה עם מים היא חלק מהעבודה, ולכן מותרת.</li>
         </ol>
         <p className="small faint" style={{ margin: 0 }}>
           המקורות: אתגרים ומקורות השראה מ-BIOMATIC. תכונות מחושבות מ-Materials Project (אוסף summary, גרסה 2026-09-28). "נוצר במעבדה" לפי סימון Materials Project למבנים שמופיעים במאגר הניסויי ICSD.
@@ -101,6 +101,7 @@ function Story({ r }: { r: Report }) {
             </div>
           ))}
         </div>
+        {f.wet > 0 && <p className="small muted" style={{ margin: 0 }}>מתוך אלה שעברו את שער התפקוד, <b>{f.wet}</b> יצאו כי הם מגיבים עם מים או לחות.</p>}
         {r.parents.map((p) => (
           <div key={p.f} className="stack" style={{ gap: 8 }}>
             <span className="small">מתוך <bdi dir="ltr" className="formula-inline">{prettyFormula(p.f)}</bdi>{p.ideas.pRisk.length > 0 && <span className="sig-bad"> · בחומר המוצא: {p.ideas.pRisk.join(', ')}</span>}</span>
