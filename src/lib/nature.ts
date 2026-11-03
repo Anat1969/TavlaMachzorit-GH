@@ -13,8 +13,11 @@ import { AVAIL, ROHS, TOXIC, availability, type Avail } from '../data/availabili
 import { swapsFrom, allows, pairRecord, BASE_REALITY, type Prediction } from './rulegen'
 import { RULES_USED, PRIOR_WEIGHT } from './worklist'
 import { propsOf, canBePiezo, type Props } from './stability'
+import { waterReaction, type Reaction } from '../data/reactivity'
 
 const NONMETAL = new Set(['nonmetal', 'halogen', 'noble'])
+/** Challenges where reacting with water or CO2 is the job itself. */
+const WATER_OK = new Set(['carbon', 'dry'])
 const RANK: Record<Avail, number> = { common: 4, available: 3, scarce: 2, rare: 1, unknown: 0 }
 
 function risk(formula: string) {
@@ -66,6 +69,7 @@ export interface Idea {
   confidence: number
   kind: 'lab' | 'computed' | 'open'   // known in experiment, only computed, nobody checked
   fn: Verdict
+  water: Reaction | null
   avail: Avail
   risks: string[]
   better: string[]
@@ -76,9 +80,9 @@ export interface Idea {
 export function ideasFor(challengeId: string, parent: string) {
   const parentParts = parseFormula(parent)
   const ref = propsOf(parentParts)
-  const pRisk = risk(parent), pAvail = scarcity(parent)
+  const pRisk = risk(parent), pAvail = scarcity(parent), pWater = waterReaction(parent)
   const fnTest = FUNCTION[challengeId]
-  const counts = { tried: 0, charge: 0, exist: 0, fn: 0, safe: 0 }
+  const counts = { tried: 0, charge: 0, exist: 0, fn: 0, safe: 0, wet: 0 }
   const out: Idea[] = []
   const seen = new Set<string>([parent])
   for (const { s, k } of swapsFrom(parent)) {
@@ -97,6 +101,9 @@ export function ideasFor(challengeId: string, parent: string) {
     if (fn.ok === false) continue
     counts.fn++
     const risks = risk(s.to)
+    // water and air: toxic or flammable gas is out; a plain reaction is out unless water is the point (capture, drying)
+    const water = waterReaction(s.to)
+    if (water && (water.severity !== 'reactive' || !WATER_OK.has(challengeId))) { counts.wet++; continue }
     if (risks.length) continue
     counts.safe++
     const best = RULES_USED.filter((r) => allows(r.ids, k)).reduce((m, r) => Math.max(m, r.reality), BASE_REALITY)
@@ -108,22 +115,22 @@ export function ideasFor(challengeId: string, parent: string) {
     if (RANK[avail] > RANK[pAvail]) better.push('מיסודות נפוצים יותר')
     const kind: Idea['kind'] = p?.experimental || s.hit ? 'lab' : exists ? 'computed' : 'open'
     const score = confidence * (fn.ok ? 1 : 0.6) * (1 + 0.4 * better.length) * (0.6 + 0.1 * RANK[avail])
-    out.push({ s, confidence, kind, fn, avail, risks, better, score })
+    out.push({ s, confidence, kind, fn, water, avail, risks, better, score })
   }
   const by = (k: Idea['kind']) => out.filter((i) => i.kind === k && (k !== 'open' || i.confidence >= 0.5)).sort((a, b) => b.score - a.score).slice(0, 3)
-  return { lab: by('lab'), computed: by('computed'), open: by('open'), counts, ref, pRisk, pAvail }
+  return { lab: by('lab'), computed: by('computed'), open: by('open'), counts, ref, pRisk, pAvail, pWater }
 }
 
 export interface Report {
   c: Challenge
   parents: { f: string; does: string; ideas: ReturnType<typeof ideasFor> }[]
   headline: { text: string; idea: Idea; parent: string } | null
-  funnel: { tried: number; charge: number; exist: number; fn: number; safe: number }
+  funnel: { tried: number; charge: number; exist: number; fn: number; safe: number; wet: number }
 }
 
 export const REPORTS: Report[] = CHALLENGES.map((c) => {
   const parents = c.parents.filter((p) => FORMULA_SET.has(p.f)).map((p) => ({ ...p, ideas: ideasFor(c.id, p.f) }))
-  const funnel = parents.reduce((a, p) => ({ tried: a.tried + p.ideas.counts.tried, charge: a.charge + p.ideas.counts.charge, exist: a.exist + p.ideas.counts.exist, fn: a.fn + p.ideas.counts.fn, safe: a.safe + p.ideas.counts.safe }), { tried: 0, charge: 0, exist: 0, fn: 0, safe: 0 })
+  const funnel = parents.reduce((a, p) => ({ tried: a.tried + p.ideas.counts.tried, charge: a.charge + p.ideas.counts.charge, exist: a.exist + p.ideas.counts.exist, fn: a.fn + p.ideas.counts.fn, safe: a.safe + p.ideas.counts.safe, wet: a.wet + p.ideas.counts.wet }), { tried: 0, charge: 0, exist: 0, fn: 0, safe: 0, wet: 0 })
   // headline: prefer an idea that improves on the parent and passed the function test with data
   const all = parents.flatMap((p) => [...p.ideas.lab, ...p.ideas.computed, ...p.ideas.open].map((idea) => ({ idea, parent: p.f })))
   const pick = all.sort((a, b) => (Number(b.idea.fn.ok === true) - Number(a.idea.fn.ok === true)) || (b.idea.better.length - a.idea.better.length) || (b.idea.score - a.idea.score))[0]
@@ -131,7 +138,7 @@ export const REPORTS: Report[] = CHALLENGES.map((c) => {
   const state = { lab: 'כבר נוצר במעבדה', computed: 'יציב בחישוב, ולא ידוע שנוצר', open: 'אף אחד עוד לא בדק' }
   const headline = pick ? {
     idea: pick.idea, parent: pick.parent,
-    text: `${pick.idea.s.to}: ${he(pick.idea.s.y)} במקום ${he(pick.idea.s.x)}. ${state[pick.idea.kind]}${pick.idea.better.length ? `, ${pick.idea.better.join(' ו')}` : ''}.`,
+    text: `${pick.idea.s.to}: ${he(pick.idea.s.y)} במקום ${he(pick.idea.s.x)}. ${state[pick.idea.kind]}${pick.idea.better.length ? `, ${pick.idea.better.join(' ו')}` : ''}${pick.idea.fn.ok === null ? '. אין עדיין נתון שמאשר שהוא עושה את העבודה' : ''}.`,
   } : null
   return { c, parents, headline, funnel }
 })

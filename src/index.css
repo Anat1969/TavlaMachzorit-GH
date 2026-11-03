@@ -684,3 +684,22 @@ mark.hl { background: linear-gradient(transparent 38%, var(--mark-insight) 38%);
   .gate-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) { .challenge, .gate i { animation: none; } }
+
+/* ---------- book of rules ---------- */
+.book-wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
+.book-stage { position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.book3d { display: block; width: 100%; height: 520px; touch-action: none; cursor: grab; }
+.book3d:active { cursor: grabbing; }
+.book-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--rim); }
+.lesson { animation: rise 0.5s both; }
+.lesson-rule { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.3; }
+.pt-step { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: rgba(0,0,0,0.15); border-inline-start: 3px solid var(--mist); animation: rise 0.4s both; }
+.chip.predict.right { border-color: var(--sig-good); color: var(--sig-good); opacity: 1; }
+.chip.predict.wrong { border-color: var(--sig-bad); color: var(--sig-bad); opacity: 1; }
+.chip.predict:disabled { cursor: default; transform: none; }
+.lesson-index { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (max-width: 1024px) {
+  .book-wrap { grid-template-columns: 1fr; }
+  .book3d { height: 380px; }
+}
+@media (prefers-reduced-motion: reduce) { .lesson, .pt-step { animation: none; } }
