@@ -1,5 +1,5 @@
 // Pages from the network (fresh code), assets from cache (fast, offline).
-const CACHE = 'tavla-v1'
+const CACHE = 'tavla-v2'
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()))
 self.addEventListener('fetch', (e) => {
