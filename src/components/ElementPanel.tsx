@@ -4,7 +4,8 @@ import { LENSES, neighbours, sharedTemplates, type Lens } from '../lib/similarit
 import { href } from '../lib/router'
 import { prettyFormula } from '../data/compounds'
 import { lazy, Suspense } from 'react'
-import { EVERYDAY, KIND_LABEL, STATE_LABEL, THINGS } from '../data/everyday'
+import { EVERYDAY, KIND_LABEL, STATE_LABEL, THINGS, WHY } from '../data/everyday'
+import { Rich, LayerTag } from './Rich'
 
 const Sample3D = lazy(() => import('../three/Sample3D'))
 
@@ -69,6 +70,7 @@ export function RealWorld({ sym, height = 200 }: { sym: string; height?: number 
   const d = EVERYDAY.get(sym)
   if (!d) return null
   const things = THINGS.filter((t) => t.els.includes(sym))
+  const why = WHY[sym]
   return (
     <section className="realworld" aria-label="בעולם האמיתי">
       <div className="sample-stage">
@@ -79,6 +81,15 @@ export function RealWorld({ sym, height = 200 }: { sym: string; height?: number 
       </div>
       <h3>איפה פוגשים אותו</h3>
       <ul className="uses">{d.uses.map((u) => <li key={u}>{u}</li>)}</ul>
+      {why && (
+        <div className="why" id={`why-${sym}`}>
+          <div className="row" style={{ justifyContent: 'space-between' }}><span className="eyebrow">למה דווקא הוא</span><LayerTag id="fact" /></div>
+          <h3 style={{ margin: '4px 0' }}>{why.q}</h3>
+          <p className="small" style={{ margin: '0 0 4px' }}><Rich text={`==${why.insight}.== ${why.text}`} /></p>
+          <div className="small faint">מקורות:</div>
+          {why.source.map((src) => <div key={src} className="small faint" dir="ltr" style={{ textAlign: 'left' }}>{src}</div>)}
+        </div>
+      )}
       {things.length > 0 && (
         <div className="row">
           <span className="eyebrow">נמצא ב</span>

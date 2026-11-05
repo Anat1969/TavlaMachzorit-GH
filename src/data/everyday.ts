@@ -130,6 +130,22 @@ for (const line of RAW.trim().split('\n')) {
 for (const sym of SYNTH_ONLY)
   EVERYDAY.set(sym, { state: 's', kind: 'synth', look: '#9aa0b0', rough: 0.3, uses: ['נוצר רק במאיץ חלקיקים, כמה אטומים בכל פעם · מתפרק תוך שברירי שנייה עד ימים'] })
 
+// "Why this element": a short distilled answer to a question another app asks.
+// Literature knowledge (layer: fact), with its source. Shown on the element card.
+export interface Why { q: string; insight: string; text: string; source: string[] }
+
+export const WHY: Record<string, Why> = {
+  Mg: {
+    q: 'למה דווקא מגנזיום יושב בלב הכלורופיל?',
+    insight: 'יון שמחזיק את האור בלי לבזבז אותו',
+    text: 'יון **\u2066Mg²⁺\u2069** נאחז בארבעת אטומי **החנקן** שבמרכז טבעת **הכלורין**, והגודל והמטען **החיובי הכפול** שלו מתאימים לחלל הזה. הוא קל ונפוץ **במי הים ובקרקע**. וכיון עם **קליפה סגורה** הוא **לא מכבה את המצב המעורר**: אנרגיית האור עוברת הלאה, ולא אובדת כחום כמו שקורה עם מתכת מעבר כמו **Fe** או **Cu**.',
+    source: [
+      'Berg, Tymoczko & Stryer, Biochemistry (W. H. Freeman), ch. "The Light Reactions of Photosynthesis"',
+      'Nelson & Cox, Lehninger Principles of Biochemistry (W. H. Freeman), ch. "Photosynthesis"',
+    ],
+  },
+}
+
 // Everyday objects are hyperedges: each one connects the elements it is made of.
 export interface Thing { id: string; name: string; about: string; els: string[] }
 
